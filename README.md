@@ -6,9 +6,14 @@
   4. [Resolvers](#resolvers)
   5. [Flow](#flow)
 ## Schema
-## Query
-## Mutation
+* **Schema là gì?** 
+>A schema is like a contract between the server and the client. It defines what a GraphQL API can and can't do, and how clients can request or change data. It's an abstraction layer that provides flexibility to consumers while hiding backend implementation details.
+* **Định nghĩa:** 
+>A schema is a collection of object types that contain fields. Each field has a type of its own. A field's type can be scalar (such as an Int or a String), or it can be another object type.
 ## Arguments
+>An argument is a value you provide for a particular field in your query. The schema defines the arguments that each of your fields accepts.
+Your resolvers can then use a field's provided arguments to help determine how to populate the data for that field. Arguments can help you retrieve specific objects, filter through a set of objects, or even transform the field's returned value. A query that performs a search usually provides the user's search term as an argument.
+* Có thể hiểu đơn giản nó là input để lọc data từ server
 ## Types
 * **Schalar types:** Int, Float, String, Boolean, ID
 * **Object types:**  một object sẽ bao gồm nhiều field, mỗi field sẽ có kiểu dữ liệu riêng
@@ -70,6 +75,10 @@
 # Flow
 1. Client gửi request cho server
 2. Gọi hàm khởi tạo context
-3. Parse query thành AST lưu vào info argument
+3. Parse query thành AST
 4. Kiểm tra AST có field nào không định nghĩa trong schema không. Nếu có thì báo lỗi, ngược lại gọi các hàm resolvers
-5. Các resolver được gọi theo resolver chain (resolve các schalar, enum trước, sau đó resolve object, rồi đi vào các field của object)
+5. Các resolver được gọi theo resolver chain:
+  * Resolve các query chỉ có scalar, enum hay list các kiểu dữ liệu đó thì chỉ cần 1 resolver
+  * Khi resolve object type: nó sẽ resolve các schalar, enum field trước, đến field là object type thì nó truyền tham số parent cho resolver tiếp theo và tiếp tục resolve cho đến khi hết field.
+  
+    >Lưu ý: resolver cha chỉ gọi resolver con khi query yêu cầu field con đó.
