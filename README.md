@@ -1,7 +1,14 @@
 # GraphQL
 ## Mục lục
-  1. [Types](#types)
-  2. [Resolvers](#resolvers)
+  1. [Schema](#schema)
+  2. [Arguments](#arguments)
+  3. [Types](#types)
+  4. [Resolvers](#resolvers)
+  5. [Flow](#flow)
+## Schema
+## Query
+## Mutation
+## Arguments
 ## Types
 * **Schalar types:** Int, Float, String, Boolean, ID
 * **Object types:**  một object sẽ bao gồm nhiều field, mỗi field sẽ có kiểu dữ liệu riêng
@@ -15,6 +22,7 @@
   * Để giữ cho data clean và consistent, ta nên sử dụng enum giới hạn locationType về 1 set các giá trị nhỏ hơn
 * **Union type:** định nghĩa những object types nào sẽ nằm trong union
   * Ví dụ:
+  
     ---
 
         union Media = Book | Movie
@@ -28,3 +36,40 @@
 * **Input types:** Schalar, Enum, Input object types
 * **Output types:** Scalar, Object, Interface, Union, Enum
 ## Resolvers
+**Resolver** là một function chịu trách nghiệm populate data cho 1 field trong schema
+* Nếu resolver không được định nghĩa thì Apollo Server sẽ tự định nghĩa **[default resolver](https://www.apollographql.com/docs/apollo-server/data/resolvers#default-resolvers)**
+* **Syntax:**
+
+  ---
+
+      resolver(parent, args, context, info) {  
+        //return something;  
+      }
+
+  ---
+  * **parent:** giá trị trả về của resolver của field cha của nó
+    
+    ---
+
+        query GetBooksByLibrary {  
+          libraries {  
+            books {  
+              title  
+              author {  
+                name  
+              }  
+            }  
+          }  
+        }  
+
+    ---
+    Ví dụ: parent của author là books
+  * **args:** object chứa tất các arguments của field này
+  * **context:** được tạo ra khi client gửi 1 request đến server, dùng để truyền những thứ cho resolver cần như là authentication scope, database connections, custom fetch functions.
+  * **info:** chứa thông tin trạng thái thực thi của operations (query, mutation) dưới dạng AST
+# Flow
+1. Client gửi request cho server
+2. Gọi hàm khởi tạo context
+3. Parse query thành AST lưu vào info argument
+4. Kiểm tra AST có field nào không định nghĩa trong schema không. Nếu có thì báo lỗi, ngược lại gọi các hàm resolvers
+5. Các resolver được gọi theo resolver chain (resolve các schalar, enum trước, sau đó resolve object, rồi đi vào các field của object)
