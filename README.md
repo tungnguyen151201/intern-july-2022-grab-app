@@ -6,14 +6,10 @@
   4. [Resolvers](#resolvers)
   5. [Flow](#flow)
 ## Schema
-* **Schema là gì?** 
->A schema is like a contract between the server and the client. It defines what a GraphQL API can and can't do, and how clients can request or change data. It's an abstraction layer that provides flexibility to consumers while hiding backend implementation details.
-* **Định nghĩa:** 
->A schema is a collection of object types that contain fields. Each field has a type of its own. A field's type can be scalar (such as an Int or a String), or it can be another object type.
+* Schema là tập hợp các kiểu object trong đó mỗi object chứa các field mang kiểu dữ liệu schalar hoặc kiểu object khác. Schema là một lớp trừu tượng giúp cho frontend và backend biết cần yêu cầu cũng như kéo về dữ liệu như thế nào.
 ## Arguments
->An argument is a value you provide for a particular field in your query. The schema defines the arguments that each of your fields accepts.
-Your resolvers can then use a field's provided arguments to help determine how to populate the data for that field. Arguments can help you retrieve specific objects, filter through a set of objects, or even transform the field's returned value. A query that performs a search usually provides the user's search term as an argument.
-* Có thể hiểu đơn giản nó là input để lọc data từ server
+* Argument là giá trị bạn cung cấp cho từng field trong query. Nó dùng để xác định làm thế nào để populate data cho field đó.
+* Các resolvers có thể dùng arguments để kéo về những object riêng biệt, lọc data từ 1 set các object hay thậm chí là biến đổi giá trị trả về của field.
 ## Types
 * **Schalar types:** Int, Float, String, Boolean, ID
 * **Object types:**  một object sẽ bao gồm nhiều field, mỗi field sẽ có kiểu dữ liệu riêng
@@ -43,12 +39,13 @@ Your resolvers can then use a field's provided arguments to help determine how t
 ## Resolvers
 **Resolver** là một function chịu trách nghiệm populate data cho 1 field trong schema
 * Nếu resolver không được định nghĩa thì Apollo Server sẽ tự định nghĩa **[default resolver](https://www.apollographql.com/docs/apollo-server/data/resolvers#default-resolvers)**
-* **Syntax:**
+* **Resolving object, query or mutation:**
 
   ---
-
-      resolver(parent, args, context, info) {  
-        //return something;  
+      Query: {
+        field_name(parent, args, context, info) {  
+          //return something;  
+        }
       }
 
   ---
@@ -72,6 +69,25 @@ Your resolvers can then use a field's provided arguments to help determine how t
   * **args:** object chứa tất các arguments của field này
   * **context:** được tạo ra khi client gửi 1 request đến server, dùng để truyền những thứ cho resolver cần như là authentication scope, database connections, custom fetch functions.
   * **info:** chứa thông tin trạng thái thực thi của operations (query, mutation) dưới dạng AST
+* **Resolving a union or an interface:**
+
+  ---
+
+      Book: {
+        __resolveType(obj, context, info){
+          // Only Author has a name field
+          if(obj.name){
+            return 'Author';
+          }
+          // Only Book has a title field
+          if(obj.title){
+            return 'Book';
+          }
+          return null; // GraphQLError is thrown
+        },
+      }
+
+  ---
 # Flow
 1. Client gửi request cho server
 2. Gọi hàm khởi tạo context
