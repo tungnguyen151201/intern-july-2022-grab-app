@@ -1,0 +1,25 @@
+{
+  "name": "training-mid-2022-apollo",
+  "version": "1.0.0",
+  "description": "1. [Schema](#schema)   2. [Arguments](#arguments)   3. [Types](#types)   4. [Resolvers](#resolvers)   5. [Flow](#flow) ## Schema * Schema là tập hợp các kiểu object trong đó mỗi object chứa các field mang kiểu dữ liệu schalar hoặc kiểu object khác. Schema là một lớp trừu tượng giúp cho frontend và backend biết cần yêu cầu cũng như kéo về dữ liệu như thế nào. ## Arguments * Argument là giá trị bạn cung cấp cho từng field trong query. Nó dùng để xác định làm thế nào để populate data cho field đó. * Các resolvers có thể dùng arguments để kéo về những object riêng biệt, lọc data từ 1 set các object hay thậm chí là biến đổi giá trị trả về của field. ## Types * **Schalar types:** Int, Float, String, Boolean, ID * **Object types:**  một object sẽ bao gồm nhiều field, mỗi field sẽ có kiểu dữ liệu riêng * **Query type:** là một kiểu object đặc biệt định nghĩa entry points cho các read operations * **Mutation type:** là một kiểu object đặc biệt định nghĩa entry points cho các write operations * **Input object types:**   * Mỗi field của 1 input object type chỉ có thể là scalar, enum, hoặc input object type khác   * Giống kiểu object nhưng có thể dùng nó như các arguments của các field trong các kiểu object thông thường khác * **Enum types:** kiểu enum dùng để biểu diễn 1 list các giá trị có thể định nghĩa cho field đó.   * Mặc dù có thể sủ dụng kiểu String để biểu diễn cho locationType (\"spaceship\" hoặc \"house\"...) nhưng nếu người dùng nhập cái gì đó không hợp lệ (\"space ship\", \"bla bla\"...) thì sẽ gây ra những unnecessary complications (ví dụ như thiếu dữ liệu, dữ liệu sai...) khi mình filter hay tổ chức dữ liệu   * Để giữ cho data clean và consistent, ta nên sử dụng enum giới hạn locationType về 1 set các giá trị nhỏ hơn * **Union type:** định nghĩa những object types nào sẽ nằm trong union   * Ví dụ:",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/itr-vn/backend-team/backend-training/training-mid-2022-apollo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/itr-vn/backend-team/backend-training/training-mid-2022-apollo/issues"
+  },
+  "homepage": "https://gitlab.com/itr-vn/backend-team/backend-training/training-mid-2022-apollo#readme",
+  "dependencies": {
+    "apollo-server": "^3.10.0",
+    "dotenv": "^16.0.1",
+    "mongoose": "^6.5.0"
+  }
+}
