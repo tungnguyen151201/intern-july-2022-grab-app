@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const User = require('./models/User');
 
 const SECRET_KEY = 'grab-authentication';
@@ -16,8 +18,8 @@ const resolvers = {
   },
   Mutation: {
     signUp: async (_, { userInput }) => {
+      const { username, password, role } = userInput;
       try {
-        const { username, role } = userInput;
         if (await User.findOne({ username })) {
           return {
             code: 400,
@@ -32,7 +34,12 @@ const resolvers = {
             message: 'Admin can be only created once',
           };
         }
-        await User.create((role === 'Driver') ? { ...userInput, isActive: false } : userInput);
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        await User.create(
+          role === 'Driver'
+            ? { ...userInput, password: hashedPassword, isActive: false }
+            : { ...userInput, password: hashedPassword }
+        );
         return {
           code: 200,
           success: true,
@@ -57,7 +64,8 @@ const resolvers = {
             token: null,
           };
         }
-        if (password !== user.password) {
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
           return {
             code: 404,
             success: false,
@@ -69,7 +77,7 @@ const resolvers = {
           return {
             code: 403,
             success: false,
-            message: 'This account haven\'t activated yet',
+            message: "This account haven't been activated yet",
             token: null,
           };
         }
@@ -116,14 +124,18 @@ const resolvers = {
         return {
           code: 400,
           success: false,
-          message: deactivate ? 'Driver has already been deactivated' : 'Driver has already been activated',
+          message: deactivate
+            ? 'Driver has already been deactivated'
+            : 'Driver has already been activated',
         };
       }
       await User.findByIdAndUpdate(user.id, { isActive: !deactivate });
       return {
         code: 200,
         success: true,
-        message: deactivate ? 'Deactivate driver successfully' : 'Activate driver successfully',
+        message: deactivate
+          ? 'Deactivate driver successfully'
+          : 'Activate driver successfully',
       };
     },
   },
