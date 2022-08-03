@@ -2,16 +2,24 @@ const { gql } = require('apollo-server');
 
 const typeDefs = gql`
     type Query {
-        getUserByRole(role: Role!): [User]!
+        me: User
     }
     type Mutation {
-        createUser(userInput: UserInput!): CreateUserResponse!
+        signUp(userInput: UserInput!): MutationResponse!
+        login(username: String!, password: String!): LoginResponse!
+        "If deactivate sets to true, it means you are deactivating user"
+        activateDriver(username: String!, deactivate: Boolean!): MutationResponse!
     }
-    type CreateUserResponse {
+    type MutationResponse {
         code: Int!
         success: Boolean!
         message: String!
-        user: User
+    }
+    type LoginResponse {
+        code: Int!
+        success: Boolean!
+        message: String!
+        token: String
     }
     interface User {
         id: ID!
@@ -45,9 +53,9 @@ const typeDefs = gql`
         role: Role!
     }
     enum Role {
-        DRIVER
-        CUSTOMER
-        ADMIN
+        Driver
+        Customer
+        Admin
     }
 `;
 

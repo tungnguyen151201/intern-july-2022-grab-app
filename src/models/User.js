@@ -6,7 +6,7 @@ const userSchema = new Schema({
   name: String,
   username: { type: String, required: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['DRIVER', 'CUSTOMER', 'ADMIN'], required: true },
+  role: { type: String, enum: ['Driver', 'Customer', 'Admin'], required: true },
   isActive: Boolean,
 });
 
