@@ -8,6 +8,9 @@ const SECRET_KEY = 'grab-authentication';
 const resolvers = {
   Query: {
     me: async (_, __, { userId }) => {
+      if (!userId) {
+        return null;
+      }
       try {
         return await User.findById(userId);
       } catch (err) {
@@ -35,7 +38,7 @@ const resolvers = {
           };
         }
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        await User.create(
+        const user = await User.create(
           role === 'Driver'
             ? { ...userInput, password: hashedPassword, isActive: false }
             : { ...userInput, password: hashedPassword }
@@ -44,6 +47,7 @@ const resolvers = {
           code: 200,
           success: true,
           message: 'Sign up successfully',
+          user,
         };
       } catch (err) {
         return {
@@ -61,7 +65,6 @@ const resolvers = {
             code: 404,
             success: false,
             message: 'User not found',
-            token: null,
           };
         }
         const match = await bcrypt.compare(password, user.password);
@@ -70,7 +73,6 @@ const resolvers = {
             code: 404,
             success: false,
             message: 'Invalid password',
-            token: null,
           };
         }
         if (user?.isActive === false) {
@@ -78,7 +80,6 @@ const resolvers = {
             code: 403,
             success: false,
             message: "This account haven't been activated yet",
-            token: null,
           };
         }
         const token = jwt.sign({ userId: user.id }, SECRET_KEY);
@@ -87,6 +88,7 @@ const resolvers = {
           success: true,
           message: 'Login successfully',
           token,
+          user,
         };
       } catch (err) {
         return {
@@ -98,6 +100,13 @@ const resolvers = {
       }
     },
     activateDriver: async (_, { username, deactivate }, { userRole }) => {
+      if (!userRole) {
+        return {
+          code: 401,
+          success: false,
+          message: 'Unauthorized error',
+        };
+      }
       if (userRole !== 'Admin') {
         return {
           code: 403,
@@ -129,20 +138,22 @@ const resolvers = {
             : 'Driver has already been activated',
         };
       }
-      await User.findByIdAndUpdate(user.id, { isActive: !deactivate });
+      const driver = await User.findByIdAndUpdate(user.id, { isActive: !deactivate });
+      driver.isActive = !deactivate;
       return {
         code: 200,
         success: true,
         message: deactivate
           ? 'Deactivate driver successfully'
           : 'Activate driver successfully',
+        driver,
       };
     },
   },
   User: {
-    async __resolveType(_, { userRole }) {
-      return userRole;
-    },
+    async __resolveType(user) {
+      return user.role;
+    },   
   },
 };
 module.exports = resolvers;

@@ -6,45 +6,49 @@ const typeDefs = gql`
     me: User
   }
   type Mutation {
-    signUp(userInput: UserInput!): MutationResponse!
+    signUp(userInput: UserInput!): SignUpResponse!
     login(username: String!, password: String!): LoginResponse!
     "If deactivate sets to true, it means you are deactivating user"
-    activateDriver(username: String!, deactivate: Boolean!): MutationResponse!
+    activateDriver(username: String!, deactivate: Boolean!): ActivateDriverResponse!
   }
-  type MutationResponse {
+  type SignUpResponse {
     code: Int!
     success: Boolean!
     message: String!
+    user: User
   }
   type LoginResponse {
     code: Int!
     success: Boolean!
     message: String!
     token: String
+    user: User
+  }
+  type ActivateDriverResponse {
+    code: Int!
+    success: Boolean!
+    message: String!
+    driver: Driver
   }
   interface User {
     id: ID!
     name: String
     username: String!
-    password: String!
   }
   type Customer implements User {
     id: ID!
     name: String
     username: String!
-    password: String!
   }
   type Admin implements User {
     id: ID!
     name: String
     username: String!
-    password: String!
   }
   type Driver implements User {
     id: ID!
     name: String
     username: String!
-    password: String!
     isActive: Boolean!
   }
   input UserInput {

@@ -10,7 +10,8 @@ require('dotenv').config();
 
 const password = '141517';
 const SECRET_KEY = 'grab-authentication';
-const connectDB = async () => {
+
+async function connectDB() {
   try {
     await mongoose.connect(
       `mongodb+srv://huytung:${password}@cluster0.szpdftl.mongodb.net/graphql?retryWrites=true&w=majority`,
@@ -23,7 +24,7 @@ const connectDB = async () => {
   } catch (err) {
     console.log('Failed to connect to database', err);
   }
-};
+}
 
 async function startApolloServer(typeDefs, resolvers) {
   const server = new ApolloServer({
