@@ -1,4 +1,4 @@
-const password = '141517';
+const password = process.env.MONGODB_PASSWORD;
 
 module.exports = {
   mongodb: {

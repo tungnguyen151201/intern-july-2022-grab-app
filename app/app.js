@@ -1,10 +1,14 @@
-const { ApolloServer, AuthenticationError } = require('apollo-server');
+const { ApolloServer, AuthenticationError } = require('apollo-server-express');
 
 // TODO import express.js
-
+const jwt = require('jsonwebtoken');
 const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
+const config = require('./config');
+const express = require('express');
+
+const app = express();
 
 async function verifyToken(token) {
   if (!token) {
@@ -12,17 +16,17 @@ async function verifyToken(token) {
   }
 
   // FIXME verify JWT
-  const { userId } = jwt.verify(token, SECRET_KEY);
+  const { userId } = jwt.verify(token, config.jwt.secretKey);
 
-  const user = await User.findById(userId);
+  const user = await dataSources.models.User.findById(userId);
 
   // TODO create signature
   const signature = { userId, userRole: user.role };
   return { isSuccess: true, signature };
 }
 
-async function createContext(req) {
-  const token = req.headers.authorization?.replace('Bearer', '');
+async function createContext({ req }) {
+  const token = req.headers.authorization?.replace('Bearer ', '');
   const verifyResult = await verifyToken(token);
 
   if (!verifyResult.isSuccess) {
@@ -39,6 +43,10 @@ const server = new ApolloServer({
   resolvers,
   dataSources: dataSources.controllers,
   context: createContext,
+});
+server.applyMiddleware({
+  app,
+  path: '/',
 });
 
 module.exports = server;

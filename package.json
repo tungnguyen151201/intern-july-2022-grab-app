@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/index"
+    "start": "nodemon app"
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,10 @@
   },
   "homepage": "https://gitlab.com/itr-vn/backend-team/backend-training/training-mid-2022-apollo#readme",
   "dependencies": {
-    "apollo-server": "^3.10.0",
+    "@graphql-tools/graphql-file-loader": "^7.5.0",
+    "@graphql-tools/load": "^7.7.1",
+    "@graphql-tools/load-files": "^6.6.0",
+    "apollo-server-express": "^3.10.0",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.1",
     "fs-extra": "^10.1.0",
