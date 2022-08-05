@@ -38,15 +38,18 @@ async function createContext({ req }) {
   };
 }
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  dataSources: dataSources.controllers,
-  context: createContext,
-});
-server.applyMiddleware({
-  app,
-  path: '/',
-});
-
-module.exports = server;
+async function startApolloExpressServer() {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    dataSources: dataSources.controllers,
+    context: createContext,
+  });
+  await server.start();
+  server.applyMiddleware({
+    app,
+    path: '/',
+  });
+}
+startApolloExpressServer();
+module.exports = app;

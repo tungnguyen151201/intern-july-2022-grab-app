@@ -1,9 +1,7 @@
-const bcrypt = require('bcrypt');
+const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 const { User } = require('../../models');
-
-const saltRounds = 10;
 
 async function signUp(args, context, info) {
   const { username, password, role } = args.userInput;
@@ -20,7 +18,7 @@ async function signUp(args, context, info) {
         message: 'Cannot create admin account',
       };
     }
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await argon2.hash(password);
     const user = await User.create(
       role === 'Driver'
         ? { ...args.userInput, password: hashedPassword, isActive: false }
@@ -49,7 +47,7 @@ async function login(args, context, info) {
         message: 'User not found',
       };
     }
-    const match = await bcrypt.compare(password, user.password);
+    const match = await argon2.verify(user.password, password);
     if (!match) {
       return {
         isSuccess: false,
