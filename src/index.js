@@ -21,9 +21,7 @@ async function connectDB() {
         useUnifiedTopology: true,
       },
     );
-    mongoose.connection.on('connected', () => {
-      console.log('Database connected!');
-    });
+    console.log('Database connected!');
   } catch (err) {
     throw new Error(err);
   }
