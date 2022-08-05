@@ -11,18 +11,20 @@ require('dotenv').config();
 const password = '141517';
 const SECRET_KEY = 'grab-authentication';
 
-async function connectDB() {
+function connectDB() {
   try {
-    await mongoose.connect(
+    mongoose.connect(
       `mongodb+srv://huytung:${password}@cluster0.szpdftl.mongodb.net/graphql?retryWrites=true&w=majority`,
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       },
     );
-    console.log('Database connected!');
+    mongoose.connection.on('connected', () => {
+      console.log('Database connected!');
+    });
   } catch (err) {
-    console.log('Failed to connect to database', err);
+    throw new Error(err);
   }
 }
 
