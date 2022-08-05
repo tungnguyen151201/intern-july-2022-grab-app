@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable no-shadow */
 const { ApolloServer } = require('apollo-server');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');

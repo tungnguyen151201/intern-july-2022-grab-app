@@ -1,0 +1,5 @@
+type ActivateDriverResponse {
+  isSuccess: Boolean!
+  message: String
+  driver: User
+}

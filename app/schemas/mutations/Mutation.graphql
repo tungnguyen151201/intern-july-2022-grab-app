@@ -1,0 +1,12 @@
+type Mutation {
+  signUp(userInput: UserInput!): SignUpResponse!
+  login(username: String!, password: String!): LoginResponse!
+
+  """
+  If deactivate sets to true, it means you are deactivating user
+  """
+  activateDriver(
+    username: String!
+    deactivate: Boolean!
+  ): ActivateDriverResponse!
+}

@@ -1,0 +1,6 @@
+type Query {
+  """
+  Get current user information
+  """
+  me: User
+}

@@ -21,7 +21,9 @@
     "apollo-server": "^3.10.0",
     "bcrypt": "^5.0.1",
     "dotenv": "^16.0.1",
+    "fs-extra": "^10.1.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.5.0"
+    "mongoose": "^6.5.0",
+    "winston": "^3.8.1"
   }
 }
