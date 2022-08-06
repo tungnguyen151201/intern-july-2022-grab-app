@@ -7,6 +7,7 @@ const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
 const config = require('./config');
 const express = require('express');
+const checkQuery = require('./utils/checkQuery');
 
 const app = express();
 
@@ -19,18 +20,30 @@ async function verifyToken(token) {
   const { userId } = jwt.verify(token, config.jwt.secretKey);
 
   const user = await dataSources.models.User.findById(userId);
+  if (!user) {
+    return { isSuccess: false, message: 'User not found'};
+  }
 
   // TODO create signature
-  const signature = { userId, userRole: user.role };
+  const signature = { userId: user.id, userRole: user.role };
   return { isSuccess: true, signature };
 }
 
 async function createContext({ req }) {
+  const {status, message} = checkQuery(req.body.query);
+
+  if (status === 'error') {
+    throw new Error(message);
+  }
+  if (status === 'skip') {
+    return null;
+  }
+
   const token = req.headers.authorization?.replace('Bearer ', '');
   const verifyResult = await verifyToken(token);
 
   if (!verifyResult.isSuccess) {
-    throw AuthenticationError(verifyResult.message);
+    throw new AuthenticationError(verifyResult.message);
   }
 
   return {
