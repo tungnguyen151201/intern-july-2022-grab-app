@@ -8,6 +8,7 @@ const resolvers = require('./resolvers');
 const config = require('./config');
 const express = require('express');
 const checkQuery = require('./utils/checkQuery');
+const redisUtils = require('./utils/redisUtils');
 
 const app = express();
 
@@ -16,9 +17,12 @@ async function verifyToken(token) {
     return { isSuccess: false, message: 'invalid token' };
   }
 
+  const inDenyList = await redisUtils.getBlockedToken(token);
+  if (inDenyList) {
+    return { isSuccess: false, message: 'Token rejected'}
+  }
   // FIXME verify JWT
   const { userId } = jwt.verify(token, config.jwt.secretKey);
-
   const user = await dataSources.models.User.findById(userId);
   if (!user) {
     return { isSuccess: false, message: 'User not found'};
@@ -30,12 +34,9 @@ async function verifyToken(token) {
 }
 
 async function createContext({ req }) {
-  const {status, message} = checkQuery(req.body.query);
+  const isPassed = checkQuery(req.body.query);
 
-  if (status === 'error') {
-    throw new Error(message);
-  }
-  if (status === 'skip') {
+  if (isPassed) {
     return null;
   }
 
@@ -57,6 +58,7 @@ async function startApolloExpressServer() {
     resolvers,
     dataSources: dataSources.controllers,
     context: createContext,
+    introspection: process.env.NODE_ENV !== 'production',
   });
   await server.start();
   server.applyMiddleware({

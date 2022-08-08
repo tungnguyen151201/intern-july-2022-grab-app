@@ -2,6 +2,7 @@ const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 const { User } = require('../../models');
+const redisUtils = require('../../../utils/redisUtils');
 
 async function signUp(args, context, info) {
   const { username, password, role } = args.userInput;
@@ -47,6 +48,7 @@ async function login(args, context, info) {
         message: 'User not found',
       };
     }
+
     const match = await argon2.verify(user.password, password);
     if (!match) {
       return {
@@ -54,13 +56,24 @@ async function login(args, context, info) {
         message: 'Invalid password',
       };
     }
+
     if (user?.isActive === false) {
       return {
         isSuccess: false,
         message: "This account haven't been activated yet",
       };
     }
-    const token = jwt.sign({ userId: user.id }, config.jwt.secretKey);
+
+    // add old token to blacklist
+    const oldToken = await redisUtils.getToken(user.id);
+    const expireTime = await redisUtils.getExpireTime(user.id);
+    await redisUtils.setBlockedToken(oldToken, expireTime);
+
+    // create new token
+    const token = jwt.sign({ userId: user.id }, config.jwt.secretKey, { expiresIn: '5m'});
+    const { exp } = jwt.verify(token, config.jwt.secretKey);
+    await redisUtils.setToken(user.id, token, exp);
+
     return {
       isSuccess: true,
       message: 'Login successfully',
@@ -113,6 +126,11 @@ async function activateDriver(args, context, info) {
   }
   const driver = await User.findByIdAndUpdate(user.id, { isActive: !deactivate });
   driver.isActive = !deactivate;
+  if (deactivate) {
+    const currentToken = await redisUtils.getToken(user.id);
+    const expireTime = await redisUtils.getExpireTime(user.id);
+    await redisUtils.setBlockedToken(currentToken, expireTime);
+  }
   return {
     isSuccess: true,
     message: deactivate

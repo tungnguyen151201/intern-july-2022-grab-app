@@ -1,27 +1,25 @@
 const gql = require('graphql-tag');
 const _ = require('lodash');
+const config = require('../config');
 
 function checkQuery(param) {
   const query = gql(param);
   const { operation, selectionSet } = query.definitions[0];
+  const queries = _.map(
+    selectionSet.selections,
+    selection => selection.name.value,
+  );
+  const hasOperationNotInWhiteList = _.difference(
+    queries,
+    operation === 'query'
+      ? config.queryWhiteList
+      : config.mutationWhiteList,
+  );
 
-  // Not a mutation
-  if (operation !== 'mutation') {
-    return { status: 'passed' };
+  if (hasOperationNotInWhiteList.length > 0) {
+    return false;
   }
 
-  // Has not activateDriver mutation
-  const activateDriverMutation = _.find(selectionSet.selections, selection => selection.name.value === 'activateDriver');
-  if (!activateDriverMutation) {
-    return { status: 'skip' };
-  }
-
-  // Has another mutation
-  const anotherMutation = _.find(selectionSet.selections, selection => selection.name.value !== 'activateDriver');
-  if (anotherMutation) {
-    return { status: 'error', message: 'Invalid mutation' };
-  }
-
-  return { status: 'passed' };
+  return true;
 }
 module.exports = checkQuery;
