@@ -1,3 +1,3 @@
-const logger = require('./utils/logger');
+const { logger } = require('./utils');
 
 global.logger = logger;

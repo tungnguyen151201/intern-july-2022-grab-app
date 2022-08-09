@@ -2,9 +2,9 @@ const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 const { User } = require('../../models');
-const redisUtils = require('../../../utils/redisUtils');
+const { redisUtils } = require('../../utils');
 
-async function signUp(args, context, info) {
+async function signUp(args, _context, _info) {
   const { username, password, role } = args.userInput;
   try {
     if (await User.findOne({ username })) {
@@ -38,7 +38,7 @@ async function signUp(args, context, info) {
   }
 }
 
-async function login(args, context, info) {
+async function login(args, _context, _info) {
   const { username, password } = args;
   try {
     const user = await User.findOne({ username });
@@ -70,8 +70,8 @@ async function login(args, context, info) {
     await redisUtils.setBlockedToken(oldToken, expireTime);
 
     // create new token
-    const token = jwt.sign({ userId: user.id }, config.jwt.secretKey, { expiresIn: '5m'});
-    const { exp } = jwt.verify(token, config.jwt.secretKey);
+    const token = jwt.sign({ userId: user.id }, config.jwt.secretKey, { expiresIn: config.jwt.expireTime });
+    const exp = Math.floor(Date.now() / 1000) + config.jwt.expireTime;
     await redisUtils.setToken(user.id, token, exp);
 
     return {
@@ -88,7 +88,7 @@ async function login(args, context, info) {
     };
   }
 }
-async function activateDriver(args, context, info) {
+async function activateDriver(args, context, _info) {
   const { username, deactivate } = args;
   const { userRole } = context.signature;
   if (!userRole) {

@@ -1,31 +1,28 @@
 const { ApolloServer, AuthenticationError } = require('apollo-server-express');
-
-// TODO import express.js
+const express = require('express');
 const jwt = require('jsonwebtoken');
 const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
 const config = require('./config');
-const express = require('express');
-const checkQuery = require('./utils/checkQuery');
-const redisUtils = require('./utils/redisUtils');
+const { checkQuery, redisUtils } = require('./utils');
 
 const app = express();
 
 async function verifyToken(token) {
   if (!token) {
-    return { isSuccess: false, message: 'invalid token' };
+    return { isSuccess: false, message: 'Invalid token' };
   }
 
   const inDenyList = await redisUtils.getBlockedToken(token);
   if (inDenyList) {
-    return { isSuccess: false, message: 'Token rejected'}
+    return { isSuccess: false, message: 'Token rejected' };
   }
   // FIXME verify JWT
   const { userId } = jwt.verify(token, config.jwt.secretKey);
   const user = await dataSources.models.User.findById(userId);
   if (!user) {
-    return { isSuccess: false, message: 'User not found'};
+    return { isSuccess: false, message: 'User not found' };
   }
 
   // TODO create signature
@@ -52,7 +49,7 @@ async function createContext({ req }) {
   };
 }
 
-async function startApolloExpressServer() {
+(async () => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -65,6 +62,6 @@ async function startApolloExpressServer() {
     app,
     path: '/',
   });
-}
-startApolloExpressServer();
+})();
+
 module.exports = app;

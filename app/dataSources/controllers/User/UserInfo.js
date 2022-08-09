@@ -1,4 +1,4 @@
-function getFullName(parent, args, context, info) {
+function getFullName(parent, _args, _context, _info) {
   return `${parent.lastName} ${parent.firstName}`;
 }
 
