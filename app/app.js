@@ -5,28 +5,41 @@ const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
 const config = require('./config');
-const { checkQuery, redisUtils } = require('./utils');
+const { checkQuery } = require('./utils');
 
 const app = express();
 
 async function verifyToken(token) {
+  // Check invalid token
   if (!token) {
     return { isSuccess: false, message: 'Invalid token' };
   }
 
-  const inDenyList = await redisUtils.getBlockedToken(token);
-  if (inDenyList) {
+  // Check token rejected
+  const inBlackList = await dataSources.redis.getBlockedToken(token);
+  if (inBlackList) {
     return { isSuccess: false, message: 'Token rejected' };
   }
-  // FIXME verify JWT
-  const { userId } = jwt.verify(token, config.jwt.secretKey);
-  const user = await dataSources.models.User.findById(userId);
+
+  const { userId, exp } = jwt.verify(token, config.jwt.secretKey);
+
+  // Caching
+  let user = await dataSources.redis.getUserById(userId);
   if (!user) {
-    return { isSuccess: false, message: 'User not found' };
+    user = await dataSources.models.User.findById(userId);
+    if (!user) {
+      return { isSuccess: false, message: 'User not found' };
+    }
+    dataSources.redis.saveUser(user);
   }
 
-  // TODO create signature
-  const signature = { userId: user.id, userRole: user.role };
+  // Check if user is active
+  if (user?.isActive === false) {
+    dataSources.redis.setBlockedToken(token, exp);
+    return { isSuccess: false, message: 'Token rejected' };
+  }
+
+  const signature = { userId, userRole: user.role };
   return { isSuccess: true, signature };
 }
 

@@ -1,5 +1,4 @@
 const gql = require('graphql-tag');
-const _ = require('lodash');
 const config = require('../config');
 
 function checkQuery(param) {

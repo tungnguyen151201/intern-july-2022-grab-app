@@ -1,8 +1,8 @@
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-const config = require('../../../config');
-const { User } = require('../../models');
-const { redisUtils } = require('../../utils');
+const config = require('../../../../config');
+const { User } = require('../../../models');
+const redis = require('../../redis');
 
 async function signUp(args, _context, _info) {
   const { username, password, role } = args.userInput;
@@ -64,15 +64,7 @@ async function login(args, _context, _info) {
       };
     }
 
-    // add old token to blacklist
-    const oldToken = await redisUtils.getToken(user.id);
-    const expireTime = await redisUtils.getExpireTime(user.id);
-    await redisUtils.setBlockedToken(oldToken, expireTime);
-
-    // create new token
     const token = jwt.sign({ userId: user.id }, config.jwt.secretKey, { expiresIn: config.jwt.expireTime });
-    const exp = Math.floor(Date.now() / 1000) + config.jwt.expireTime;
-    await redisUtils.setToken(user.id, token, exp);
 
     return {
       isSuccess: true,
@@ -124,13 +116,13 @@ async function activateDriver(args, context, _info) {
         : 'Driver has already been activated',
     };
   }
+  // Update db
   const driver = await User.findByIdAndUpdate(user.id, { isActive: !deactivate });
   driver.isActive = !deactivate;
-  if (deactivate) {
-    const currentToken = await redisUtils.getToken(user.id);
-    const expireTime = await redisUtils.getExpireTime(user.id);
-    await redisUtils.setBlockedToken(currentToken, expireTime);
-  }
+
+  // Caching
+  redis.saveUser(driver);
+
   return {
     isSuccess: true,
     message: deactivate

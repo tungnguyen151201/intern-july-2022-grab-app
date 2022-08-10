@@ -1,5 +1,7 @@
 const redis = require('redis');
 
+// TODO create only 1 connect
+// hash jwt before set redis
 async function connectRedis() {
   const redisClient = redis.createClient();
   try {
@@ -70,6 +72,10 @@ async function getExpireTime(key) {
   } catch (error) {
     throw new Error(error);
   }
+}
+
+async function delKey(key) {
+  if (!key) {}
 }
 
 module.exports = {

@@ -1,6 +1,6 @@
 function getFullName(parent, args, context, info) {
   const { dataSources } = context;
-  const result = dataSources.getFullName(parent, args, context, info);
+  const result = dataSources.mongodb.getFullName(parent, args, context, info);
   return result;
 }
 
