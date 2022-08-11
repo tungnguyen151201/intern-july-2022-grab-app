@@ -12,10 +12,10 @@ async function getBlockedToken(token) {
   return result;
 }
 
-async function setBlockedToken(token, exprireAt) {
+async function setBlockedToken(token, expireAt) {
   const hashedToken = `bl_${hashToken(token)}`;
   await redisClient.set(hashedToken, '1');
-  await redisClient.expireAt(hashedToken, exprireAt);
+  await redisClient.expireAt(hashedToken, expireAt);
 }
 
 module.exports = {

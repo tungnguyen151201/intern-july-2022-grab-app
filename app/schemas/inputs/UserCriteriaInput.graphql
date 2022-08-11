@@ -1,0 +1,6 @@
+input UserCriteriaInput {
+    username: String
+    firstName: String
+    lastName: String
+    role: Role
+}

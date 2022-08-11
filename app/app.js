@@ -36,7 +36,7 @@ async function verifyToken(token) {
   }
 
   // Check if user is active
-  if (user.isActive === false) {
+  if (user.status === 'Deactivated') {
     setBlockedToken(token, exp);
     return { isSuccess: false, message: 'Token rejected' };
   }
@@ -45,14 +45,30 @@ async function verifyToken(token) {
   return { isSuccess: true, signature };
 }
 
-async function createContext({ req }) {
-  const isPassed = checkQuery(req.body.query);
+function logout(token) {
+  if (!token) {
+    return { isSuccess: false, message: 'Invalid token' };
+  }
 
-  if (isPassed) {
+  const { exp } = jwt.verify(token, config.jwt.secretKey);
+  setBlockedToken(token, exp);
+
+  return { isSuccess: true, message: 'Logged out' };
+}
+
+async function createContext({ req }) {
+  const queryType = checkQuery(req.body.query);
+
+  if (queryType === 'passed') {
     return null;
   }
 
   const token = req.headers.authorization?.replace('Bearer ', '');
+
+  if (queryType === 'logout') {
+    return logout(token);
+  }
+
   const verifyResult = await verifyToken(token);
 
   if (!verifyResult.isSuccess) {

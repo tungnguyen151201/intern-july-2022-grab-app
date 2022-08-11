@@ -1,0 +1,4 @@
+type LogoutResponse {
+  isSuccess: Boolean!
+  message: String
+}

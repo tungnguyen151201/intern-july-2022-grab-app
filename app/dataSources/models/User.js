@@ -9,7 +9,7 @@ const userSchema = new Schema({
   password: { type: String, required: true },
 
   role: { type: String, enum: ['Driver', 'Customer', 'Admin'], required: true },
-  isActive: Boolean,
+  status: { type: String, enum: ['Active', 'Pending', 'Deactivated'] },
 });
 
 const User = mongoose.model('user', userSchema);

@@ -4,7 +4,7 @@ const config = require('../../../config');
 const { User } = require('../../models');
 const { redisClient } = require('../../utils/redis');
 
-async function signUp(args, _context, _info) {
+async function signUp(args) {
   try {
     const { username, password, role } = args.userInput;
     const existedUser = await User.findOne({ username }).lean();
@@ -23,8 +23,8 @@ async function signUp(args, _context, _info) {
     const hashedPassword = await argon2.hash(password);
     const user = await User.create(
       role === 'Driver'
-        ? { password: hashedPassword, isActive: false, ...args.userInput }
-        : { password: hashedPassword, ...args.userInput },
+        ? { ...args.userInput, password: hashedPassword, status: 'Pending' }
+        : { ...args.userInput, password: hashedPassword },
     );
     return {
       isSuccess: true,
@@ -39,7 +39,7 @@ async function signUp(args, _context, _info) {
   }
 }
 
-async function login(args, _context, _info) {
+async function login(args) {
   const { username, password } = args;
   try {
     const user = await User.findOne({ username }).lean();
@@ -58,14 +58,14 @@ async function login(args, _context, _info) {
       };
     }
 
-    if (user?.isActive === false) {
+    if (user.status === 'Pending' || user.status === 'Deactivated') {
       return {
         isSuccess: false,
         message: 'Invalid Credentials!',
       };
     }
 
-    const token = jwt.sign({ userId: user.id }, config.jwt.secretKey, { expiresIn: config.jwt.expireTime });
+    const token = jwt.sign({ userId: user._id.toString() }, config.jwt.secretKey, { expiresIn: config.jwt.expireTime });
 
     return {
       isSuccess: true,
@@ -81,42 +81,57 @@ async function login(args, _context, _info) {
     };
   }
 }
-async function activateDriver(args, context, _info) {
+
+async function activateDriver(args, context) {
   const { username, deactivate } = args;
   const { userRole } = context.signature;
 
   if (userRole !== 'Admin') {
     return {
       isSuccess: false,
-      message: 'You must be an Admin',
+      message: 'Permission denied',
     };
   }
-  const user = await User.findOne({ username });
+
+  const user = await User.findOne({ username }).lean();
   if (!user) {
     return {
       isSuccess: false,
       message: 'User not found',
     };
   }
+
   if (user.role !== 'Driver') {
     return {
       isSuccess: false,
       message: 'User must be a Driver',
     };
   }
-  if (user.isActive !== deactivate) {
-    return {
-      isSuccess: false,
-      message: deactivate
-        ? 'Driver has already been deactivated'
-        : 'Driver has already been activated',
-    };
-  }
-  // Update db
-  const driver = await User.findByIdAndUpdate(user.id, { isActive: !deactivate }).lean();
-  driver.isActive = !deactivate;
 
-  // Caching
+  let status;
+  if (deactivate) {
+    if (user.status === 'Pending' || user.status === 'Deactivated') {
+      return {
+        isSuccess: false,
+        message: 'Driver has already been deactivated',
+      };
+    }
+    status = 'Deactivated';
+  } else {
+    if (user.status === 'Active') {
+      return {
+        isSuccess: false,
+        message: 'Driver has already been activated',
+      };
+    }
+    status = 'Active';
+  }
+
+  // Update db
+  const driver = await User.findByIdAndUpdate(user._id.toString(), { status }).lean();
+  driver.status = status;
+
+  // Delete cache
   redisClient.del(driver._id.toString());
 
   return {
