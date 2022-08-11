@@ -1,7 +1,5 @@
-const mongodb = require('./mongodb');
-const redis = require('./redis');
+const UserControllers = require('./User');
 
 module.exports = {
-  mongodb,
-  redis,
+  ...UserControllers,
 };

@@ -11,7 +11,14 @@ global.redisIsReady = false;
   }
 })();
 
-redisClient.on('ready', () => { global.redisIsReady = true; });
-redisClient.on('error', () => { global.redisIsReady = false; });
+redisClient.on('ready', () => {
+  logger.info('connected to redis');
+  global.redisIsReady = true;
+});
+
+redisClient.on('error', error => {
+  logger.info('redis error', error);
+  global.redisIsReady = false;
+});
 
 module.exports = redisClient;

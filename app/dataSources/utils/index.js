@@ -1,7 +1,7 @@
-const userUtils = require('./controllers/userUtils');
-const redisUtils = require('./controllers/redisUtils');
+const controllerUtils = require('./controllers');
+const redis = require('./redis');
 
 module.exports = {
-  ...userUtils,
-  ...redisUtils,
+  ...controllerUtils,
+  redis,
 };

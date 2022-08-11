@@ -7,6 +7,12 @@ const resolvers = require('./resolvers');
 const config = require('./config');
 const { checkQuery } = require('./utils');
 
+const {
+  getBlockedToken,
+  setBlockedToken,
+  getUserFromCache,
+} = dataSources.redisUtils;
+
 const app = express();
 
 async function verifyToken(token) {
@@ -16,7 +22,7 @@ async function verifyToken(token) {
   }
 
   // Check token rejected
-  const inBlackList = await dataSources.redis.getBlockedToken(token);
+  const inBlackList = await getBlockedToken(token);
   if (inBlackList) {
     return { isSuccess: false, message: 'Token rejected' };
   }
@@ -24,18 +30,14 @@ async function verifyToken(token) {
   const { userId, exp } = jwt.verify(token, config.jwt.secretKey);
 
   // Caching
-  let user = await dataSources.redis.getUserById(userId);
+  const user = await getUserFromCache(userId);
   if (!user) {
-    user = await dataSources.models.User.findById(userId);
-    if (!user) {
-      return { isSuccess: false, message: 'User not found' };
-    }
-    dataSources.redis.saveUser(user);
+    return { isSuccess: false, message: 'User not found' };
   }
 
   // Check if user is active
-  if (user?.isActive === false) {
-    dataSources.redis.setBlockedToken(token, exp);
+  if (user.isActive === false) {
+    setBlockedToken(token, exp);
     return { isSuccess: false, message: 'Token rejected' };
   }
 

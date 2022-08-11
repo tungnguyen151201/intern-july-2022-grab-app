@@ -1,13 +1,14 @@
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-const config = require('../../../../config');
-const { User } = require('../../../models');
-const redis = require('../../redis');
+const config = require('../../../config');
+const { User } = require('../../models');
+const { redisClient } = require('../../utils/redis');
 
 async function signUp(args, _context, _info) {
-  const { username, password, role } = args.userInput;
   try {
-    if (await User.findOne({ username })) {
+    const { username, password, role } = args.userInput;
+    const existedUser = await User.findOne({ username }).lean();
+    if (existedUser) {
       return {
         isSuccess: false,
         message: 'Username invalid or already taken',
@@ -41,11 +42,11 @@ async function signUp(args, _context, _info) {
 async function login(args, _context, _info) {
   const { username, password } = args;
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).lean();
     if (!user) {
       return {
         isSuccess: false,
-        message: 'User not found',
+        message: 'Invalid Credentials!',
       };
     }
 
@@ -53,14 +54,14 @@ async function login(args, _context, _info) {
     if (!match) {
       return {
         isSuccess: false,
-        message: 'Invalid password',
+        message: 'Invalid Credentials!',
       };
     }
 
     if (user?.isActive === false) {
       return {
         isSuccess: false,
-        message: "This account haven't been activated yet",
+        message: 'Invalid Credentials!',
       };
     }
 
@@ -83,12 +84,7 @@ async function login(args, _context, _info) {
 async function activateDriver(args, context, _info) {
   const { username, deactivate } = args;
   const { userRole } = context.signature;
-  if (!userRole) {
-    return {
-      isSuccess: false,
-      message: 'Unauthorized error',
-    };
-  }
+
   if (userRole !== 'Admin') {
     return {
       isSuccess: false,
@@ -117,11 +113,11 @@ async function activateDriver(args, context, _info) {
     };
   }
   // Update db
-  const driver = await User.findByIdAndUpdate(user.id, { isActive: !deactivate });
+  const driver = await User.findByIdAndUpdate(user.id, { isActive: !deactivate }).lean();
   driver.isActive = !deactivate;
 
   // Caching
-  redis.deleteKey(driver.id);
+  redisClient.del(driver._id.toString());
 
   return {
     isSuccess: true,
