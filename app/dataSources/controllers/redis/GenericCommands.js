@@ -1,16 +1,4 @@
 const redisClient = require('./Client');
-const { hashToken } = require('../../utils');
-
-async function getBlockedToken(token) {
-  const hashedToken = `bl_${hashToken(token)}`;
-  const result = await get(hashedToken);
-  return result;
-}
-
-function setBlockedToken(token, keyExp) {
-  const hashedToken = `bl_${hashToken(token)}`;
-  set(hashedToken, 'value', keyExp);
-}
 
 async function get(key) {
   if (!global.redisIsReady) {
@@ -70,8 +58,6 @@ function deleteKey(key) {
 }
 
 module.exports = {
-  getBlockedToken,
-  setBlockedToken,
   get,
   set,
   getExpireTime,

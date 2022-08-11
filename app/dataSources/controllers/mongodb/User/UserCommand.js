@@ -22,8 +22,8 @@ async function signUp(args, _context, _info) {
     const hashedPassword = await argon2.hash(password);
     const user = await User.create(
       role === 'Driver'
-        ? { ...args.userInput, password: hashedPassword, isActive: false }
-        : { ...args.userInput, password: hashedPassword },
+        ? { password: hashedPassword, isActive: false, ...args.userInput }
+        : { password: hashedPassword, ...args.userInput },
     );
     return {
       isSuccess: true,
@@ -121,7 +121,7 @@ async function activateDriver(args, context, _info) {
   driver.isActive = !deactivate;
 
   // Caching
-  redis.saveUser(driver);
+  redis.deleteKey(driver.id);
 
   return {
     isSuccess: true,

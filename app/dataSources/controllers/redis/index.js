@@ -1,7 +1,9 @@
 const generic = require('./GenericCommands');
-const caching = require('./Caching');
+const userControllers = require('./User');
+const tokenControllers = require('./Token');
 
 module.exports = {
   ...generic,
-  ...caching,
+  ...userControllers,
+  ...tokenControllers,
 };
