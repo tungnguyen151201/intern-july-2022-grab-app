@@ -3,5 +3,8 @@ type Query {
   Get current user information
   """
   me: User
-  getUsers(criteria: UserCriteriaInput!): [User]
+  getUsers(criteria: UserCriteriaInput): [User]
+  myTrips(criteria: MyTripCriteriaInput): [Trip]
+  getTrips(criteria: TripCriteriaInput): [Trip]
+  getPendingTrips: [Trip]
 }

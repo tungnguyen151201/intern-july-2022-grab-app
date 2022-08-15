@@ -1,0 +1,5 @@
+type CreateTripResponse {
+  isSuccess: Boolean!
+  message: String
+  trip: Trip
+}

@@ -2,4 +2,5 @@ enum TripStatus {
   Pending
   Driving
   Finished
+  Canceled
 }

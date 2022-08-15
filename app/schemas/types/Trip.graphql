@@ -1,7 +1,7 @@
 type Trip {
     id: ID!
     customer: User!
-    driver: User!
+    driver: User
     departure: String!
     destination: String!
     startDate: String

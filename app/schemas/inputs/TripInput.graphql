@@ -1,0 +1,4 @@
+input TripInput {
+  departure: String!
+  destination: String!
+}

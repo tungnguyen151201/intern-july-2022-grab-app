@@ -57,15 +57,15 @@ function logout(token) {
 }
 
 async function createContext({ req }) {
-  const queryType = checkQuery(req.body.query);
+  const request = checkQuery(req.body.query);
 
-  if (queryType === 'passed') {
+  if (request === 'passed') {
     return null;
   }
 
   const token = req.headers.authorization?.replace('Bearer ', '');
 
-  if (queryType === 'logout') {
+  if (request === 'logout') {
     return logout(token);
   }
 

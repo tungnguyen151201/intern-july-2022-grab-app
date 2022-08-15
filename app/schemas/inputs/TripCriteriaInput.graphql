@@ -1,0 +1,10 @@
+input TripCriteriaInput {
+    customer: ID
+    driver: ID
+    departure: String
+    destination: String
+    startDate: String
+    endDate: String
+    totalPaid: Float
+    status: TripStatus
+}

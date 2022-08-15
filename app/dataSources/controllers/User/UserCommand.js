@@ -31,10 +31,10 @@ async function signUp(args) {
       message: 'Sign up successfully',
       user,
     };
-  } catch (err) {
+  } catch (error) {
     return {
       isSuccess: false,
-      message: err,
+      message: error,
     };
   }
 }
@@ -73,10 +73,10 @@ async function login(args) {
       token,
       user,
     };
-  } catch (err) {
+  } catch (error) {
     return {
       isSuccess: false,
-      message: err,
+      message: error,
       token: null,
     };
   }
@@ -128,8 +128,7 @@ async function activateDriver(args, context) {
   }
 
   // Update db
-  const driver = await User.findByIdAndUpdate(user._id.toString(), { status }).lean();
-  driver.status = status;
+  const driver = await User.findByIdAndUpdate(user._id.toString(), { status }, { new: true }).lean();
 
   // Delete cache
   redisClient.del(driver._id.toString());

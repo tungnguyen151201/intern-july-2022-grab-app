@@ -8,5 +8,9 @@ type Mutation {
     username: String!
     deactivate: Boolean!
   ): ActivateDriverResponse!
-  logout: LogoutResponse!
+  logout: MutationResponse!
+  createTrip(tripInput: TripInput!): CreateTripResponse!
+  acceptTrip(id: ID!): AcceptTripResponse!
+  finishTrip(id: ID!): MutationResponse!
+  cancelTrip(id: ID!): MutationResponse!
 }

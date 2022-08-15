@@ -1,4 +1,5 @@
-type LogoutResponse {
+type AcceptTripResponse {
   isSuccess: Boolean!
   message: String
+  trip: Trip
 }

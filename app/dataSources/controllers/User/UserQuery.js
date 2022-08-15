@@ -1,6 +1,6 @@
 const { User } = require('../../models');
 
-async function getUserById(__, context) {
+async function getMe(__, context) {
   const { userId } = context.signature;
   try {
     const user = await User.findById(userId).lean();
@@ -18,13 +18,14 @@ async function getUsersWithCriteria(args, context) {
     return null;
   }
   try {
-    const users = await User.find({ ...args.criteria });
+    const users = await User.find(args.criteria).lean();
     return users;
   } catch (error) {
     throw new Error(error);
   }
 }
+
 module.exports = {
-  getUserById,
+  getMe,
   getUsersWithCriteria,
 };
