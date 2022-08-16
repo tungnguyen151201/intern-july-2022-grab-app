@@ -9,7 +9,7 @@ async function createTrip(args, context) {
     };
   }
   try {
-    const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Driving'] } });
+    const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Driving'] } }).lean();
     if (trip) {
       return {
         isSuccess: false,
@@ -39,6 +39,13 @@ async function acceptTrip(args, context) {
     };
   }
   try {
+    const isDriving = await Trip.findOne({ driver: userId, status: 'Driving' }).lean();
+    if (isDriving) {
+      return {
+        isSuccess: false,
+        message: 'Invalid trip',
+      };
+    }
     let trip = await Trip.findById(args.id).lean();
     if (!trip) {
       return {

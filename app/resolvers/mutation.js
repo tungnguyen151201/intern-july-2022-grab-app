@@ -18,6 +18,9 @@ async function activateDriver(__, args, context, info) {
 
 function logout(__, ___, context) {
   const { isSuccess, message } = context;
+  if (!isSuccess) {
+    return { isSuccess: false, message: 'logout failed' };
+  }
   return { isSuccess, message };
 }
 

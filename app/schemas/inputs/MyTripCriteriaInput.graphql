@@ -1,8 +1,8 @@
 input MyTripCriteriaInput {
     departure: String
     destination: String
-    startDate: String
-    endDate: String
+    from: String
+    to: String
     totalPaid: Float
     status: TripStatus
 }

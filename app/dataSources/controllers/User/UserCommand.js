@@ -113,7 +113,7 @@ async function activateDriver(args, context) {
     if (user.status === 'Pending' || user.status === 'Deactivated') {
       return {
         isSuccess: false,
-        message: 'Driver has already been deactivated',
+        message: 'Driver already deactivated',
       };
     }
     status = 'Deactivated';
@@ -121,7 +121,7 @@ async function activateDriver(args, context) {
     if (user.status === 'Active') {
       return {
         isSuccess: false,
-        message: 'Driver has already been activated',
+        message: 'Driver already activated',
       };
     }
     status = 'Active';
