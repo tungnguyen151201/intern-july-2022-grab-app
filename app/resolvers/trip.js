@@ -14,24 +14,32 @@ async function getDriver(parent, args, context, info) {
   return result;
 }
 
-function startDate(parent) {
-  if (!parent.startDate) {
+function createAt(parent) {
+  if (!parent.createAt) {
     return null;
   }
-  return (new Date(parent.startDate)).toString();
+  return (new Date(parent.createAt)).toString();
 }
 
-function endDate(parent) {
-  if (!parent.endDate) {
+function startTime(parent) {
+  if (!parent.startTime) {
     return null;
   }
-  return (new Date(parent.endDate)).toString();
+  return (new Date(parent.startTime)).toString();
+}
+
+function endTime(parent) {
+  if (!parent.endTime) {
+    return null;
+  }
+  return (new Date(parent.endTime)).toString();
 }
 
 module.exports = {
   id: getId,
   customer: getCustomer,
   driver: getDriver,
-  startDate,
-  endDate,
+  createAt,
+  startTime,
+  endTime,
 };

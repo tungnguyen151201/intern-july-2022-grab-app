@@ -4,8 +4,9 @@ type Trip {
     driver: User
     departure: String!
     destination: String!
-    startDate: String
-    endDate: String
+    createAt: String!
+    startTime: String
+    endTime: String
     totalPaid: Float
     status: TripStatus!
 }

@@ -12,7 +12,6 @@ redisClient.on('ready', () => {
 
 redisClient.on('error', error => {
   logger.error('redis error', error);
-  process.exit(1);
 });
 
 module.exports = redisClient;

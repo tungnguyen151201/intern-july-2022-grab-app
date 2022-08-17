@@ -9,14 +9,14 @@ async function createTrip(args, context) {
     };
   }
   try {
-    const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Driving'] } }).lean();
+    const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Accepted', 'Driving'] } }).lean();
     if (trip) {
       return {
         isSuccess: false,
         message: 'Trip created failed',
       };
     }
-    const newTrip = await Trip.create({ ...args.tripInput, customer: userId, status: 'Pending', startDate: Date.now(), totalPaid: 1000 });
+    const newTrip = await Trip.create({ ...args.tripInput, customer: userId, status: 'Pending', createAt: Date.now(), totalPaid: 1000 });
     return {
       isSuccess: true,
       message: 'Trip created successful',
@@ -39,7 +39,7 @@ async function acceptTrip(args, context) {
     };
   }
   try {
-    const isDriving = await Trip.findOne({ driver: userId, status: 'Driving' }).lean();
+    const isDriving = await Trip.findOne({ driver: userId, status: { $in: ['Accepted', 'Driving'] } }).lean();
     if (isDriving) {
       return {
         isSuccess: false,
@@ -59,10 +59,46 @@ async function acceptTrip(args, context) {
         message: 'Trip already taken',
       };
     }
-    trip = await Trip.findByIdAndUpdate(args.id, { status: 'Driving', driver: userId }, { new: true }).lean();
+    trip = await Trip.findByIdAndUpdate(args.id, { status: 'Accepted', driver: userId }, { new: true }).lean();
     return {
       isSuccess: true,
       message: 'Trip accepted',
+      trip,
+    };
+  } catch (error) {
+    return {
+      isSuccess: false,
+      message: error,
+    };
+  }
+}
+
+async function startTrip(args, context) {
+  const { userId, userRole } = context.signature;
+  if (userRole !== 'Driver') {
+    return {
+      isSuccess: false,
+      message: 'Permission denied',
+    };
+  }
+  try {
+    let trip = await Trip.findById(args.id).lean();
+    if (!trip) {
+      return {
+        isSuccess: false,
+        message: 'Invalid trip',
+      };
+    }
+    if (trip.status !== 'Accepted' || trip.driver.toString() !== userId) {
+      return {
+        isSuccess: false,
+        message: 'Invalid trip',
+      };
+    }
+    trip = await Trip.findByIdAndUpdate(args.id, { status: 'Driving', startTime: Date.now() }, { new: true }).lean();
+    return {
+      isSuccess: true,
+      message: 'Trip started',
       trip,
     };
   } catch (error) {
@@ -95,7 +131,7 @@ async function finishTrip(args, context) {
         message: 'Invalid trip',
       };
     }
-    trip = await Trip.findByIdAndUpdate(args.id, { status: 'Finished', endDate: Date.now() }, { new: true }).lean();
+    trip = await Trip.findByIdAndUpdate(args.id, { status: 'Finished', endTime: Date.now() }, { new: true }).lean();
     return {
       isSuccess: true,
       message: 'Trip finished',
@@ -125,7 +161,7 @@ async function cancelTrip(args, context) {
         message: 'Invalid trip',
       };
     }
-    if ((trip.status !== 'Pending' && trip.status !== 'Driving') || trip.customer.toString() !== userId) {
+    if ((trip.status !== 'Pending' && trip.status !== 'Accepted') || trip.customer.toString() !== userId) {
       return {
         isSuccess: false,
         message: 'Invalid trip',
@@ -148,6 +184,7 @@ async function cancelTrip(args, context) {
 module.exports = {
   createTrip,
   acceptTrip,
+  startTrip,
   finishTrip,
   cancelTrip,
 };

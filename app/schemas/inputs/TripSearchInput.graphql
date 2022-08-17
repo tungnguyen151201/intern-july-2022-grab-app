@@ -1,4 +1,4 @@
-input TripCriteriaInput {
+input TripSearchInput {
     customer: ID
     driver: ID
     departure: String

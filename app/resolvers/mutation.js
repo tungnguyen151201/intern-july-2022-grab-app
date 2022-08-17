@@ -1,3 +1,4 @@
+// User
 async function signUp(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.signUp(args, context, info);
@@ -24,6 +25,7 @@ function logout(__, ___, context) {
   return { isSuccess, message };
 }
 
+// Trip
 async function createTrip(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.createTrip(args, context, info);
@@ -33,6 +35,12 @@ async function createTrip(__, args, context, info) {
 async function acceptTrip(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.acceptTrip(args, context, info);
+  return result;
+}
+
+async function startTrip(__, args, context, info) {
+  const { dataSources } = context;
+  const result = await dataSources.startTrip(args, context, info);
   return result;
 }
 
@@ -49,12 +57,15 @@ async function cancelTrip(__, args, context, info) {
 }
 
 module.exports = {
+  // User
   signUp,
   login,
   activateDriver,
   logout,
+  // Trip
   createTrip,
   acceptTrip,
+  startTrip,
   finishTrip,
   cancelTrip,
 };

@@ -9,8 +9,10 @@ type Mutation {
     deactivate: Boolean!
   ): ActivateDriverResponse!
   logout: MutationResponse!
+
   createTrip(tripInput: TripInput!): CreateTripResponse!
   acceptTrip(id: ID!): AcceptTripResponse!
+  startTrip(id: ID!): MutationResponse!
   finishTrip(id: ID!): MutationResponse!
   cancelTrip(id: ID!): MutationResponse!
 }

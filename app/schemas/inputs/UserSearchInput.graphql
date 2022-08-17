@@ -1,4 +1,4 @@
-input UserCriteriaInput {
+input UserSearchInput {
     username: String
     firstName: String
     lastName: String

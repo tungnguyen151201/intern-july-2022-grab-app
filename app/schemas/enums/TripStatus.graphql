@@ -1,5 +1,6 @@
 enum TripStatus {
   Pending
+  Accepted
   Driving
   Finished
   Canceled

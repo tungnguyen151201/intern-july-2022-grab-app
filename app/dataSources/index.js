@@ -7,7 +7,6 @@ mongoose.connect(config.mongodb.connnectionString, config.mongodb.options);
 
 mongoose.connection.on('error', error => {
   logger.error('mongodb connection error', error);
-  process.exit(1);
 });
 
 mongoose.connection.on('connected', () => {

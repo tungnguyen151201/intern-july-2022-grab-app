@@ -12,16 +12,16 @@ function resolveCriteria(criteria) {
     toDate.setDate(toDate.getDate() + 1);
   }
 
-  let startDate;
+  let createAt;
   if (fromDate && !toDate) {
-    startDate = { $gte: fromDate };
+    createAt = { $gte: fromDate };
   } else if (!fromDate && toDate) {
-    startDate = { $lt: toDate };
+    createAt = { $lt: toDate };
   } else if (fromDate && toDate) {
-    startDate = { $gte: fromDate, $lt: toDate };
+    createAt = { $gte: fromDate, $lt: toDate };
   }
 
-  return { ...criteria, startDate };
+  return { ...criteria, createAt };
 }
 
 module.exports = {

@@ -7,10 +7,11 @@ const tripSchema = new Schema({
   driver: { type: mongoose.ObjectId, ref: 'user' },
   departure: { type: String, required: true },
   destination: { type: String, required: true },
-  startDate: Date,
-  endDate: Date,
+  createAt: { type: Date, required: true },
+  startTime: Date,
+  endTime: Date,
   totalPaid: Number,
-  status: { type: String, enum: ['Pending', 'Driving', 'Finished', 'Canceled'], required: true },
+  status: { type: String, enum: ['Pending', 'Accepted', 'Driving', 'Finished', 'Canceled'], required: true },
 });
 
 const Trip = mongoose.model('trip', tripSchema);

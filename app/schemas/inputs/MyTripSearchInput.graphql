@@ -1,4 +1,4 @@
-input MyTripCriteriaInput {
+input MyTripSearchInput {
     departure: String
     destination: String
     from: String
