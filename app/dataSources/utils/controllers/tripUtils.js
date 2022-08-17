@@ -1,4 +1,5 @@
 function resolveCriteria(criteria) {
+  if (!criteria) { return null; }
   const { from, to } = criteria;
 
   if (!from && !to) {
