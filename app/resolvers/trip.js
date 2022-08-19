@@ -3,15 +3,33 @@ function getId(parent) {
 }
 
 async function getCustomer(parent, args, context, info) {
-  const { dataSources } = context;
-  const result = await dataSources.getCustomerOfTrip(parent, args, context, info);
-  return result;
+  try {
+    const { dataloaders } = context;
+    const { customer } = parent;
+    if (!customer) {
+      return null;
+    }
+    const result = await dataloaders.userById.load(customer.toString());
+    return result;
+  } catch (error) {
+    logger.error('trip - getCustomer error', error);
+    throw error;
+  }
 }
 
 async function getDriver(parent, args, context, info) {
-  const { dataSources } = context;
-  const result = await dataSources.getDriverOfTrip(parent, args, context, info);
-  return result;
+  try {
+    const { dataloaders } = context;
+    const { driver } = parent;
+    if (!driver) {
+      return null;
+    }
+    const result = await dataloaders.userById.load(driver.toString());
+    return result;
+  } catch (error) {
+    logger.error('trip - getDriver error', error);
+    throw error;
+  }
 }
 
 function createAt(parent) {

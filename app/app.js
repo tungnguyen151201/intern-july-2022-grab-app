@@ -6,7 +6,7 @@ const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
 const config = require('./config');
-const { checkQuery } = require('./utils');
+const { checkQuery, createDataLoader } = require('./utils');
 
 const { getBlockedToken, setBlockedToken, getUserFromCache } = dataSources.redisUtils;
 
@@ -40,16 +40,6 @@ async function verifyToken(token) {
 
   const signature = { userId, userRole: user.role };
   return { isSuccess: true, signature };
-}
-
-function createDataLoader() {
-  const userLoader = new DataLoader(async userIds => {
-    const users = await dataSources.models.User.find({
-      _id: { $in: userIds },
-    }).lean();
-    return userIds.map(userId => users.find(user => user._id.toString() === userId));
-  });
-  return { userLoader };
 }
 
 async function createContext({ req }) {
