@@ -12,6 +12,8 @@ const userSchema = new Schema({
   status: { type: String, enum: ['Active', 'Pending', 'Deactivated'] },
 });
 
+userSchema.index({ firstName: 'text', lastName: 'text' });
+
 const User = mongoose.model('user', userSchema);
 
 module.exports = User;

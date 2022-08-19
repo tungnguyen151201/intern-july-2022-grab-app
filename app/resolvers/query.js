@@ -7,7 +7,7 @@ async function getMe(__, args, context, info) {
 
 async function getUsers(__, args, context, info) {
   const { dataSources } = context;
-  const result = await dataSources.getUsersWithCriteria(args, context, info);
+  const result = await dataSources.getUsers(args, context, info);
   return result;
 }
 

@@ -1,17 +1,20 @@
-const { User } = require('../../models');
+// const { User } = require('../../models');
 
-async function getCustomerOfTrip(parent) {
+async function getCustomerOfTrip(parent, __, context) {
   try {
-    const customer = await User.findById(parent.customer);
+    const { dataloaders } = context;
+    const customer = await dataloaders.userLoader.load(parent.customer.toString());
     return customer;
   } catch (error) {
     throw new Error(error);
   }
 }
 
-async function getDriverOfTrip(parent) {
+async function getDriverOfTrip(parent, __, context) {
   try {
-    const driver = await User.findById(parent.driver);
+    if (!parent.driver) return null;
+    const { dataloaders } = context;
+    const driver = await dataloaders.userLoader.load(parent.driver.toString());
     return driver;
   } catch (error) {
     throw new Error(error);

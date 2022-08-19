@@ -1,14 +1,15 @@
 const { Trip } = require('../../models');
 
 async function createTrip(args, context) {
-  const { userId, userRole } = context.signature;
-  if (userRole !== 'Customer') {
-    return {
-      isSuccess: false,
-      message: 'Permission denied',
-    };
-  }
   try {
+    const { userId, userRole } = context.signature;
+    if (userRole !== 'Customer') {
+      return {
+        isSuccess: false,
+        message: 'Permission denied',
+      };
+    }
+
     const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Accepted', 'Driving'] } }).lean();
     if (trip) {
       return {
@@ -16,6 +17,7 @@ async function createTrip(args, context) {
         message: 'Trip created failed',
       };
     }
+
     const newTrip = await Trip.create({ ...args.tripInput, customer: userId, status: 'Pending', createAt: Date.now(), totalPaid: 1000 });
     return {
       isSuccess: true,
@@ -31,14 +33,15 @@ async function createTrip(args, context) {
 }
 
 async function acceptTrip(args, context) {
-  const { userId, userRole } = context.signature;
-  if (userRole !== 'Driver') {
-    return {
-      isSuccess: false,
-      message: 'Permission denied',
-    };
-  }
   try {
+    const { userId, userRole } = context.signature;
+    if (userRole !== 'Driver') {
+      return {
+        isSuccess: false,
+        message: 'Permission denied',
+      };
+    }
+
     const isDriving = await Trip.findOne({ driver: userId, status: { $in: ['Accepted', 'Driving'] } }).lean();
     if (isDriving) {
       return {
@@ -46,6 +49,7 @@ async function acceptTrip(args, context) {
         message: 'Invalid trip',
       };
     }
+
     let trip = await Trip.findById(args.id).lean();
     if (!trip) {
       return {
@@ -53,12 +57,14 @@ async function acceptTrip(args, context) {
         message: 'Invalid trip',
       };
     }
+
     if (trip.status !== 'Pending') {
       return {
         isSuccess: false,
         message: 'Trip already taken',
       };
     }
+
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Accepted', driver: userId }, { new: true }).lean();
     return {
       isSuccess: true,
@@ -74,14 +80,15 @@ async function acceptTrip(args, context) {
 }
 
 async function startTrip(args, context) {
-  const { userId, userRole } = context.signature;
-  if (userRole !== 'Driver') {
-    return {
-      isSuccess: false,
-      message: 'Permission denied',
-    };
-  }
   try {
+    const { userId, userRole } = context.signature;
+    if (userRole !== 'Driver') {
+      return {
+        isSuccess: false,
+        message: 'Permission denied',
+      };
+    }
+
     let trip = await Trip.findById(args.id).lean();
     if (!trip) {
       return {
@@ -89,12 +96,14 @@ async function startTrip(args, context) {
         message: 'Invalid trip',
       };
     }
+
     if (trip.status !== 'Accepted' || trip.driver.toString() !== userId) {
       return {
         isSuccess: false,
         message: 'Invalid trip',
       };
     }
+
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Driving', startTime: Date.now() }, { new: true }).lean();
     return {
       isSuccess: true,
@@ -110,14 +119,15 @@ async function startTrip(args, context) {
 }
 
 async function finishTrip(args, context) {
-  const { userId, userRole } = context.signature;
-  if (userRole !== 'Driver') {
-    return {
-      isSuccess: false,
-      message: 'Permission denied',
-    };
-  }
   try {
+    const { userId, userRole } = context.signature;
+    if (userRole !== 'Driver') {
+      return {
+        isSuccess: false,
+        message: 'Permission denied',
+      };
+    }
+
     let trip = await Trip.findById(args.id).lean();
     if (!trip) {
       return {
@@ -125,12 +135,14 @@ async function finishTrip(args, context) {
         message: 'Invalid trip',
       };
     }
+
     if (trip.status !== 'Driving' || trip.driver.toString() !== userId) {
       return {
         isSuccess: false,
         message: 'Invalid trip',
       };
     }
+
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Finished', endTime: Date.now() }, { new: true }).lean();
     return {
       isSuccess: true,
@@ -146,14 +158,15 @@ async function finishTrip(args, context) {
 }
 
 async function cancelTrip(args, context) {
-  const { userId, userRole } = context.signature;
-  if (userRole !== 'Customer') {
-    return {
-      isSuccess: false,
-      message: 'Permission denied',
-    };
-  }
   try {
+    const { userId, userRole } = context.signature;
+    if (userRole !== 'Customer') {
+      return {
+        isSuccess: false,
+        message: 'Permission denied',
+      };
+    }
+
     let trip = await Trip.findById(args.id).lean();
     if (!trip) {
       return {
@@ -161,6 +174,7 @@ async function cancelTrip(args, context) {
         message: 'Invalid trip',
       };
     }
+
     if ((trip.status !== 'Pending' && trip.status !== 'Accepted') || trip.customer.toString() !== userId) {
       return {
         isSuccess: false,

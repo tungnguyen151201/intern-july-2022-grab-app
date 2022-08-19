@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const config = require('../config');
 const controllers = require('./controllers');
+const models = require('./models');
 const { redis } = require('./utils');
 
 mongoose.connect(config.mongodb.connnectionString, config.mongodb.options);
@@ -15,5 +16,6 @@ mongoose.connection.on('connected', () => {
 
 module.exports = {
   controllers: () => ({ ...controllers }),
+  models,
   redisUtils: redis,
 };

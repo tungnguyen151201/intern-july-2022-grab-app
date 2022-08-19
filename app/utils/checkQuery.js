@@ -10,10 +10,6 @@ function checkQuery(param) {
     selection => selection.name.value,
   );
 
-  if (queries.length === 1 && queries[0] === 'logout') {
-    return 'logout';
-  }
-
   const hasOperationNotInWhiteList = _.difference(
     queries,
     operation === 'query'

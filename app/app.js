@@ -1,17 +1,14 @@
 const { ApolloServer, AuthenticationError } = require('apollo-server-express');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const DataLoader = require('dataloader');
 const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
 const config = require('./config');
 const { checkQuery } = require('./utils');
 
-const {
-  getBlockedToken,
-  setBlockedToken,
-  getUserFromCache,
-} = dataSources.redisUtils;
+const { getBlockedToken, setBlockedToken, getUserFromCache } = dataSources.redisUtils;
 
 const app = express();
 
@@ -37,7 +34,7 @@ async function verifyToken(token) {
 
   // Check if user is active
   if (user.status === 'Deactivated') {
-    setBlockedToken(token, exp);
+    await setBlockedToken(token, exp);
     return { isSuccess: false, message: 'Token rejected' };
   }
 
@@ -45,30 +42,23 @@ async function verifyToken(token) {
   return { isSuccess: true, signature };
 }
 
-function logout(token) {
-  if (!token) {
-    return { isSuccess: false, message: 'Invalid token' };
-  }
-
-  const { exp } = jwt.verify(token, config.jwt.secretKey);
-  setBlockedToken(token, exp);
-
-  return { isSuccess: true, message: 'Logged out' };
+function createDataLoader() {
+  const userLoader = new DataLoader(async userIds => {
+    const users = await dataSources.models.User.find({
+      _id: { $in: userIds },
+    }).lean();
+    return userIds.map(userId => users.find(user => user._id.toString() === userId));
+  });
+  return { userLoader };
 }
 
 async function createContext({ req }) {
   const request = checkQuery(req.body.query);
-
   if (request === 'passed') {
     return null;
   }
 
   const token = req.headers.authorization?.replace('Bearer ', '');
-
-  if (request === 'logout') {
-    return logout(token);
-  }
-
   const verifyResult = await verifyToken(token);
 
   if (!verifyResult.isSuccess) {
@@ -77,6 +67,8 @@ async function createContext({ req }) {
 
   return {
     signature: verifyResult.signature,
+    token,
+    dataloaders: createDataLoader(),
   };
 }
 

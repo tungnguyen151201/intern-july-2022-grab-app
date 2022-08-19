@@ -1,0 +1,4 @@
+input TimeInput {
+    from: String!
+    to: String!
+}

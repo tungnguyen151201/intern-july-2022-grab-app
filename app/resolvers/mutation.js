@@ -17,12 +17,10 @@ async function activateDriver(__, args, context, info) {
   return result;
 }
 
-function logout(__, ___, context) {
-  const { isSuccess, message } = context;
-  if (!isSuccess) {
-    return { isSuccess: false, message: 'logout failed' };
-  }
-  return { isSuccess, message };
+async function logout(__, args, context, info) {
+  const { dataSources } = context;
+  const result = await dataSources.logout(args, context, info);
+  return result;
 }
 
 // Trip

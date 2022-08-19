@@ -1,0 +1,5 @@
+input TripFilterInput {
+    time: TimeInput
+    place: String
+    status: TripStatus
+}

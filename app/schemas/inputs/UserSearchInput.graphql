@@ -1,6 +1,0 @@
-input UserSearchInput {
-    username: String
-    firstName: String
-    lastName: String
-    role: Role
-}

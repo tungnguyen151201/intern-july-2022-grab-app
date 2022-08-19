@@ -2,7 +2,7 @@ const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 const { User } = require('../../models');
-const { redisClient } = require('../../utils/redis');
+const { redisClient, setBlockedToken } = require('../../utils/redis');
 
 async function signUp(args) {
   try {
@@ -40,8 +40,8 @@ async function signUp(args) {
 }
 
 async function login(args) {
-  const { username, password } = args;
   try {
+    const { username, password } = args;
     const user = await User.findOne({ username }).lean();
     if (!user) {
       return {
@@ -65,7 +65,11 @@ async function login(args) {
       };
     }
 
-    const token = jwt.sign({ userId: user._id.toString() }, config.jwt.secretKey, { expiresIn: config.jwt.expireTime });
+    const token = jwt.sign(
+      { userId: user._id.toString() },
+      config.jwt.secretKey,
+      { expiresIn: config.jwt.expireTime },
+    );
 
     return {
       isSuccess: true,
@@ -83,67 +87,92 @@ async function login(args) {
 }
 
 async function activateDriver(args, context) {
-  const { username, deactivate } = args;
-  const { userRole } = context.signature;
+  try {
+    const { username, deactivate } = args;
+    const { userRole } = context.signature;
 
-  if (userRole !== 'Admin') {
-    return {
-      isSuccess: false,
-      message: 'Permission denied',
-    };
-  }
-
-  const user = await User.findOne({ username }).lean();
-  if (!user) {
-    return {
-      isSuccess: false,
-      message: 'User not found',
-    };
-  }
-
-  if (user.role !== 'Driver') {
-    return {
-      isSuccess: false,
-      message: 'User must be a Driver',
-    };
-  }
-
-  let status;
-  if (deactivate) {
-    if (user.status === 'Pending' || user.status === 'Deactivated') {
+    if (userRole !== 'Admin') {
       return {
         isSuccess: false,
-        message: 'Driver already deactivated',
+        message: 'Permission denied',
       };
     }
-    status = 'Deactivated';
-  } else {
-    if (user.status === 'Active') {
+
+    const user = await User.findOne({ username }).lean();
+    if (!user) {
       return {
         isSuccess: false,
-        message: 'Driver already activated',
+        message: 'User not found',
       };
     }
-    status = 'Active';
+
+    if (user.role !== 'Driver') {
+      return {
+        isSuccess: false,
+        message: 'User must be a Driver',
+      };
+    }
+
+    let status;
+    if (deactivate) {
+      if (user.status === 'Pending' || user.status === 'Deactivated') {
+        return {
+          isSuccess: false,
+          message: 'Driver already deactivated',
+        };
+      }
+      status = 'Deactivated';
+    } else {
+      if (user.status === 'Active') {
+        return {
+          isSuccess: false,
+          message: 'Driver already activated',
+        };
+      }
+      status = 'Active';
+    }
+
+    // Update db
+    const driver = await User.findByIdAndUpdate(
+      user._id.toString(),
+      { status },
+      { new: true },
+    ).lean();
+
+    // Delete cache
+    redisClient.del(driver._id.toString());
+
+    return {
+      isSuccess: true,
+      message: deactivate
+        ? 'Deactivate driver successfully'
+        : 'Activate driver successfully',
+      driver,
+    };
+  } catch (error) {
+    return { isSuccess: false, message: error };
   }
+}
 
-  // Update db
-  const driver = await User.findByIdAndUpdate(user._id.toString(), { status }, { new: true }).lean();
+async function logout(__, context) {
+  try {
+    const { token } = context;
+    if (!token) {
+      return { isSuccess: false, message: 'Invalid token' };
+    }
 
-  // Delete cache
-  redisClient.del(driver._id.toString());
+    const { exp } = jwt.verify(token, config.jwt.secretKey);
+    await setBlockedToken(token, exp);
 
-  return {
-    isSuccess: true,
-    message: deactivate
-      ? 'Deactivate driver successfully'
-      : 'Activate driver successfully',
-    driver,
-  };
+    return { isSuccess: true, message: 'Logged out' };
+  } catch (error) {
+    return { isSuccess: false, message: error };
+  }
 }
 
 module.exports = {
   signUp,
   login,
   activateDriver,
+  logout,
 };
