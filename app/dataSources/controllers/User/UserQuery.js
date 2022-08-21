@@ -28,7 +28,7 @@ async function getUsers(args, context, info) {
 
     const { criteria, limit, cursor } = args;
     const { username, name } = criteria;
-    const fields = getFields(info, 'getUsers');
+    const fields = getFields(info);
 
     if (name) {
       return getUsersByName(name, limit, cursor, fields);

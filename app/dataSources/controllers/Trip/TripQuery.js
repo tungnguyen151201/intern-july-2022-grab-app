@@ -15,7 +15,7 @@ async function getMyTrips(args, context, info) {
     }
 
     const { limit, cursor } = args;
-    const fields = getFields(info, 'myTrips');
+    const fields = getFields(info);
 
     const filters = userRole === 'Customer' ? { customer: userId } : { driver: userId };
     if (cursor) {
@@ -40,9 +40,14 @@ async function getTrips(args, context, info) {
       return null;
     }
 
+    const fields = getFields(info);
     const { criteria, limit, cursor } = args;
+
+    if (!criteria) {
+      return getAllTrips(limit, cursor, fields);
+    }
+
     const { place, time, status } = criteria;
-    const fields = getFields(info, 'getTrips');
 
     let trips;
     if (time) {

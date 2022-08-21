@@ -1,15 +1,10 @@
 const _ = require('lodash');
 const { User } = require('../../models');
 
-function getFields(info, operationName) {
-  const { selections } = info.operation.selectionSet;
+function getFields(info) {
+  const { selections } = info.fieldNodes[0].selectionSet;
 
-  const fields = _.find(
-    selections,
-    selection => selection.name.value === operationName,
-  ).selectionSet.selections;
-
-  const fieldNames = _.map(fields, field => {
+  const fieldNames = _.map(selections, field => {
     if (field.name.value === 'id') return '_id';
     if (field.name.value === 'name') return 'firstName lastName';
     return field.name.value;
