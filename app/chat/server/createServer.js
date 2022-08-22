@@ -58,10 +58,6 @@ function createChatServer(server) {
         }
 
         io.to(room).emit('chat-message', { user: fullname, msg });
-        // const roomDB = await Room.findById(room);
-        // const subMsg = { message: msg, user: userId };
-        // roomDB.messages.push(subMsg);
-        // roomDB.save();
       });
 
       socket.on('disconnect', () => {
