@@ -3,11 +3,11 @@ const redisClient = require('./clients');
 const config = require('../../../config');
 
 async function saveUserToCache(user) {
-  const { firstName, lastName, userName, role } = user;
+  const { firstName, lastName, username, role } = user;
   await redisClient.setEx(
     user._id.toString(),
     config.jwt.expireTime,
-    JSON.stringify({ firstName, lastName, userName, role }),
+    JSON.stringify({ firstName, lastName, username, role }),
   );
 }
 

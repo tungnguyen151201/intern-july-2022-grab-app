@@ -54,6 +54,13 @@ async function cancelTrip(__, args, context, info) {
   return result;
 }
 
+// Room chat
+async function createChatRoom(__, args, context, info) {
+  const { dataSources } = context;
+  const result = await dataSources.createChatRoom(args, context, info);
+  return result;
+}
+
 module.exports = {
   // User
   signUp,
@@ -66,4 +73,6 @@ module.exports = {
   startTrip,
   finishTrip,
   cancelTrip,
+  // Room chat
+  createChatRoom,
 };

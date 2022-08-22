@@ -1,9 +1,10 @@
+const _ = require('lodash');
 const { User } = require('../models');
 
 async function batchUsersById(keys) {
   const userIds = keys.map(key => JSON.parse(key).userId);
-  const { fields } = JSON.parse(keys[0]);
-
+  let fields = keys.map(key => JSON.parse(key).fields);
+  fields = _.uniq(fields).join(' ');
   const users = await User.find(
     {
       _id: { $in: userIds },

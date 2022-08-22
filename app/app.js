@@ -1,46 +1,20 @@
 const { ApolloServer, AuthenticationError } = require('apollo-server-express');
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const DataLoader = require('dataloader');
+const http = require('http');
 const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
-const config = require('./config');
-const { checkQuery, createDataLoader } = require('./utils');
-
-const { getBlockedToken, setBlockedToken, getUserFromCache } = dataSources.redisUtils;
+const { checkQuery, createDataLoader, verifyToken } = require('./utils');
+const { createChatServer } = require('./chat/server');
 
 const app = express();
+const server = http.createServer(app);
 
-async function verifyToken(token) {
-  // Check invalid token
-  if (!token) {
-    return { isSuccess: false, message: 'Invalid token' };
-  }
+createChatServer(server);
 
-  // Check token rejected
-  const inBlackList = await getBlockedToken(token);
-  if (inBlackList) {
-    return { isSuccess: false, message: 'Token rejected' };
-  }
-
-  const { userId, exp } = jwt.verify(token, config.jwt.secretKey);
-
-  // Caching
-  const user = await getUserFromCache(userId);
-  if (!user) {
-    return { isSuccess: false, message: 'User not found' };
-  }
-
-  // Check if user is active
-  if (user.status === 'Deactivated') {
-    await setBlockedToken(token, exp);
-    return { isSuccess: false, message: 'Token rejected' };
-  }
-
-  const signature = { userId, userRole: user.role };
-  return { isSuccess: true, signature };
-}
+app.get('/chat', (__, res) => {
+  res.sendFile(`${__dirname}/chat/client/index.html`);
+});
 
 async function createContext({ req }) {
   const request = checkQuery(req.body.query);
@@ -63,18 +37,17 @@ async function createContext({ req }) {
 }
 
 (async () => {
-  const server = new ApolloServer({
+  const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
     dataSources: dataSources.controllers,
     context: createContext,
     introspection: process.env.NODE_ENV !== 'production',
   });
-  await server.start();
-  server.applyMiddleware({
+  await apolloServer.start();
+  apolloServer.applyMiddleware({
     app,
     path: '/',
   });
 })();
-
-module.exports = app;
+module.exports = server;

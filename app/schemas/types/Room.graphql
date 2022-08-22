@@ -1,0 +1,12 @@
+type Room {
+    id: ID!
+    name: String
+    user1: User!
+    user2: User!
+    messages: [Message]
+}
+
+type Message {
+    user: User
+    message: String
+}

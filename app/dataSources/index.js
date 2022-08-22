@@ -5,6 +5,7 @@ const models = require('./models');
 const loaders = require('./loaders');
 const { redis } = require('./utils');
 
+mongoose.set('debug', true);
 mongoose.connect(config.mongodb.connnectionString, config.mongodb.options);
 
 mongoose.connection.on('error', error => {

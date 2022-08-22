@@ -27,8 +27,13 @@ async function getUsers(args, context, info) {
     }
 
     const { criteria, limit, cursor } = args;
-    const { username, name } = criteria;
     const fields = getFields(info);
+
+    if (!criteria) {
+      return getAllUsers(limit, cursor, fields);
+    }
+
+    const { username, name } = criteria;
 
     if (name) {
       return getUsersByName(name, limit, cursor, fields);

@@ -1,0 +1,5 @@
+type CreateChatRoomResponse {
+    isSuccess: Boolean!
+    message: String
+    room: Room
+}
