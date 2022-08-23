@@ -11,4 +11,5 @@ type Query {
   getTripById(id: ID!): Trip
 
   getRoomById(id: ID!): Room
+  getMyRooms(limit: Int, cursor: ID): [Room]
 }

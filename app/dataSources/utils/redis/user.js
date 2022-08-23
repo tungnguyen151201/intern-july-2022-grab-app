@@ -17,7 +17,7 @@ async function getUserFromCache(userId) {
     return { _id: userId, ...user };
   }
 
-  user = await User.findById(userId);
+  user = await User.findById(userId).lean();
   if (!user) {
     return null;
   }

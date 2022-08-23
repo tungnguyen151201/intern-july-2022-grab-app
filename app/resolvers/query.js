@@ -36,9 +36,16 @@ async function getTripById(__, args, context, info) {
   return result;
 }
 
+// Room
 async function getRoomById(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.getRoomById(args, context, info);
+  return result;
+}
+
+async function getMyRooms(__, args, context, info) {
+  const { dataSources } = context;
+  const result = await dataSources.getMyRooms(args, context, info);
   return result;
 }
 
@@ -53,4 +60,5 @@ module.exports = {
   getTripById,
   // Room
   getRoomById,
+  getMyRooms,
 };

@@ -22,6 +22,36 @@ async function getRoomById(args, context, info) {
   }
 }
 
+async function getMyRooms(args, context, info) {
+  try {
+    const { userId } = context.signature;
+
+    const { limit, cursor } = args;
+    const fields = getFields(info);
+
+    const filters = {
+      $or: [
+        { user1: userId },
+        { user2: userId },
+      ],
+    };
+    if (cursor) {
+      filters._id = { $lt: cursor };
+    }
+
+    const rooms = await Room.find(filters, fields)
+      .sort({ _id: -1 })
+      .limit(limit || 10)
+      .lean();
+
+    return rooms;
+  } catch (error) {
+    logger.error('RoomQuery - getMyRooms error:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   getRoomById,
+  getMyRooms,
 };

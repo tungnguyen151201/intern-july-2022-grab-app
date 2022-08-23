@@ -59,6 +59,7 @@ function createChatServer(server) {
 
       socket.on('chat-message', async ({ msg }) => {
         if (!room) {
+          socket.emit('handle-error', 'Join room to chat!');
           return;
         }
 
@@ -72,8 +73,6 @@ function createChatServer(server) {
         if (!room) {
           return;
         }
-
-        socket.leave(room);
 
         io.to(room).emit('chat-message', { user: fullname, msg: 'left room' });
       });
