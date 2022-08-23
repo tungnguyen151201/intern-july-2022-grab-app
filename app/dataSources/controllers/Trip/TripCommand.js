@@ -10,7 +10,7 @@ async function createTrip(args, context) {
       };
     }
 
-    const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Accepted', 'Driving'] } }).lean();
+    const trip = await Trip.findOne({ customer: userId, status: { $in: ['Pending', 'Accepted', 'Driving'] } }, '_id').lean();
     if (trip) {
       return {
         isSuccess: false,
@@ -25,6 +25,7 @@ async function createTrip(args, context) {
       trip: newTrip,
     };
   } catch (error) {
+    logger.error('TripCommand - createTrip error:', error);
     return {
       isSuccess: false,
       message: error,
@@ -42,7 +43,7 @@ async function acceptTrip(args, context) {
       };
     }
 
-    const isDriving = await Trip.findOne({ driver: userId, status: { $in: ['Accepted', 'Driving'] } }).lean();
+    const isDriving = await Trip.findOne({ driver: userId, status: { $in: ['Accepted', 'Driving'] } }, '_id').lean();
     if (isDriving) {
       return {
         isSuccess: false,
@@ -50,7 +51,7 @@ async function acceptTrip(args, context) {
       };
     }
 
-    let trip = await Trip.findById(args.id).lean();
+    let trip = await Trip.findById(args.id, 'status').lean();
     if (!trip) {
       return {
         isSuccess: false,
@@ -72,6 +73,7 @@ async function acceptTrip(args, context) {
       trip,
     };
   } catch (error) {
+    logger.error('TripCommand - acceptTrip error:', error);
     return {
       isSuccess: false,
       message: error,
@@ -89,7 +91,7 @@ async function startTrip(args, context) {
       };
     }
 
-    let trip = await Trip.findById(args.id).lean();
+    let trip = await Trip.findById(args.id, 'status driver').lean();
     if (!trip) {
       return {
         isSuccess: false,
@@ -111,6 +113,7 @@ async function startTrip(args, context) {
       trip,
     };
   } catch (error) {
+    logger.error('TripCommand - startTrip error:', error);
     return {
       isSuccess: false,
       message: error,
@@ -128,7 +131,7 @@ async function finishTrip(args, context) {
       };
     }
 
-    let trip = await Trip.findById(args.id).lean();
+    let trip = await Trip.findById(args.id, 'status driver').lean();
     if (!trip) {
       return {
         isSuccess: false,
@@ -150,6 +153,7 @@ async function finishTrip(args, context) {
       trip,
     };
   } catch (error) {
+    logger.error('TripCommand - finishTrip error:', error);
     return {
       isSuccess: false,
       message: error,
@@ -167,7 +171,7 @@ async function cancelTrip(args, context) {
       };
     }
 
-    let trip = await Trip.findById(args.id).lean();
+    let trip = await Trip.findById(args.id, 'status customer').lean();
     if (!trip) {
       return {
         isSuccess: false,
@@ -188,6 +192,7 @@ async function cancelTrip(args, context) {
       trip,
     };
   } catch (error) {
+    logger.error('TripCommand - cancelTrip error:', error);
     return {
       isSuccess: false,
       message: error,

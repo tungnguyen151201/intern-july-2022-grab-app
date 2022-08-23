@@ -19,6 +19,7 @@ function createChatServer(server) {
 
       next();
     } catch (error) {
+      logger.error('chat server - authentication error:', error);
       next(error);
     }
   });
@@ -29,19 +30,23 @@ function createChatServer(server) {
       const { userId } = socket.signature;
       const { firstName, lastName } = await getUserFromCache(userId);
       const fullname = `${lastName} ${firstName}`;
+
       socket.on('join-room', async roomId => {
         if (!roomId) {
           socket.emit('handle-error', 'Room not found');
           return;
         }
-        const roomDb = await Room.findById(roomId).lean();
 
+        const roomDb = await Room.findById(roomId, 'user1 user2').lean();
         if (!roomDb) {
           socket.emit('handle-error', 'Room not found');
           return;
         }
 
-        if (roomDb.user1.toString() !== userId && roomDb.user2.toString() !== userId) {
+        if (
+          roomDb.user1.toString() !== userId
+          && roomDb.user2.toString() !== userId
+        ) {
           socket.emit('handle-error', 'Invalid Credentials!');
           return;
         }
@@ -52,19 +57,24 @@ function createChatServer(server) {
         room = roomId;
       });
 
-      socket.on('chat-message', ({ msg }) => {
+      socket.on('chat-message', async ({ msg }) => {
         if (!room) {
           return;
         }
 
         io.to(room).emit('chat-message', { user: fullname, msg });
+        await Room.findByIdAndUpdate(room, {
+          $push: { messages: JSON.stringify({ user: userId, message: msg }) },
+        }).lean();
       });
 
       socket.on('disconnect', () => {
         if (!room) {
           return;
         }
+
         socket.leave(room);
+
         io.to(room).emit('chat-message', { user: fullname, msg: 'left room' });
       });
     } catch (error) {

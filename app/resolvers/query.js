@@ -29,6 +29,19 @@ async function getPendingTrips(__, args, context, info) {
   const result = await dataSources.getPendingTrips(args, context, info);
   return result;
 }
+
+async function getTripById(__, args, context, info) {
+  const { dataSources } = context;
+  const result = await dataSources.getTripById(args, context, info);
+  return result;
+}
+
+async function getRoomById(__, args, context, info) {
+  const { dataSources } = context;
+  const result = await dataSources.getRoomById(args, context, info);
+  return result;
+}
+
 module.exports = {
   // User
   me: getMe,
@@ -37,4 +50,7 @@ module.exports = {
   myTrips: getMyTrips,
   getTrips,
   getPendingTrips,
+  getTripById,
+  // Room
+  getRoomById,
 };

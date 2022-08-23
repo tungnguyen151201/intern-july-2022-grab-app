@@ -6,7 +6,6 @@ function getId(parent) {
 
 async function getCustomer(parent, __, context, info) {
   try {
-    const { dataloaders } = context;
     const { customer } = parent;
     if (!customer) {
       return null;
@@ -14,27 +13,32 @@ async function getCustomer(parent, __, context, info) {
 
     const fields = getFields(info);
     const key = JSON.stringify({ userId: customer.toString(), fields });
+
+    const { dataloaders } = context;
     const result = await dataloaders.userById.load(key);
+
     return result;
   } catch (error) {
-    logger.error('trip - getCustomer error', error);
+    logger.error('trip - getCustomer error:', error);
     throw error;
   }
 }
 
 async function getDriver(parent, __, context, info) {
   try {
-    const { dataloaders } = context;
     const { driver } = parent;
     if (!driver) {
       return null;
     }
     const fields = getFields(info);
     const key = JSON.stringify({ userId: driver.toString(), fields });
+
+    const { dataloaders } = context;
     const result = await dataloaders.userById.load(key);
+
     return result;
   } catch (error) {
-    logger.error('trip - getDriver error', error);
+    logger.error('trip - getDriver error:', error);
     throw error;
   }
 }

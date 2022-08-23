@@ -5,8 +5,3 @@ type Room {
     user2: User!
     messages: [Message]
 }
-
-type Message {
-    user: User
-    message: String
-}

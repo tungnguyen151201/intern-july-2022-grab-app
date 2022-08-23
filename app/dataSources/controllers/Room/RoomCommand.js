@@ -5,7 +5,15 @@ async function createChatRoom(args, context) {
     const { userToChat, name } = args;
     const { userId } = context.signature;
 
-    const existedRoom = await Room.findOne({ user1: userId, user2: userToChat }, '_id').lean();
+    const existedRoom = await Room.findOne(
+      {
+        $or: [
+          { user1: userId, user2: userToChat },
+          { user1: userToChat, user2: userId },
+        ],
+      },
+      '_id',
+    ).lean();
     if (existedRoom) {
       return {
         isSuccess: false,
@@ -24,6 +32,7 @@ async function createChatRoom(args, context) {
       room,
     };
   } catch (error) {
+    logger.error('RoomCommand - createChatRoom error:', error);
     return {
       isSuccess: false,
       message: error,

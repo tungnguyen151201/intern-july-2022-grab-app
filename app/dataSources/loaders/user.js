@@ -3,8 +3,9 @@ const { User } = require('../models');
 
 async function batchUsersById(keys) {
   const userIds = keys.map(key => JSON.parse(key).userId);
-  let fields = keys.map(key => JSON.parse(key).fields);
+  let fields = _.flatMap(keys, key => JSON.parse(key).fields?.split(' '));
   fields = _.uniq(fields).join(' ');
+
   const users = await User.find(
     {
       _id: { $in: userIds },

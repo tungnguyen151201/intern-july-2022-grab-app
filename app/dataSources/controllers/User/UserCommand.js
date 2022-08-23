@@ -7,7 +7,7 @@ const { redisClient, setBlockedToken } = require('../../utils/redis');
 async function signUp(args) {
   try {
     const { username, password, role } = args.userInput;
-    const existedUser = await User.findOne({ username }).lean();
+    const existedUser = await User.findOne({ username }, '_id').lean();
     if (existedUser) {
       return {
         isSuccess: false,
@@ -32,6 +32,7 @@ async function signUp(args) {
       user,
     };
   } catch (error) {
+    logger.error('UserCommand - signUp error:', error);
     return {
       isSuccess: false,
       message: error,
@@ -42,7 +43,7 @@ async function signUp(args) {
 async function login(args) {
   try {
     const { username, password } = args;
-    const user = await User.findOne({ username }).lean();
+    const user = await User.findOne({ username }, 'username password status').lean();
     if (!user) {
       return {
         isSuccess: false,
@@ -78,6 +79,7 @@ async function login(args) {
       user,
     };
   } catch (error) {
+    logger.error('UserCommand - login error:', error);
     return {
       isSuccess: false,
       message: error,
@@ -98,7 +100,7 @@ async function activateDriver(args, context) {
       };
     }
 
-    const user = await User.findOne({ username }).lean();
+    const user = await User.findOne({ username }, 'role status').lean();
     if (!user) {
       return {
         isSuccess: false,
@@ -139,7 +141,7 @@ async function activateDriver(args, context) {
       { new: true },
     ).lean();
 
-    // Delete cache
+    // Clear cache
     redisClient.del(driver._id.toString());
 
     return {
@@ -150,6 +152,7 @@ async function activateDriver(args, context) {
       driver,
     };
   } catch (error) {
+    logger.error('UserCommand - activateDriver error:', error);
     return { isSuccess: false, message: error };
   }
 }
@@ -166,6 +169,7 @@ async function logout(__, context) {
 
     return { isSuccess: true, message: 'Logged out' };
   } catch (error) {
+    logger.error('UserCommand - logout error:', error);
     return { isSuccess: false, message: error };
   }
 }

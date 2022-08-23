@@ -29,7 +29,8 @@ async function getMyTrips(args, context, info) {
 
     return trips;
   } catch (error) {
-    throw new Error(error);
+    logger.error('TripQuery - getMyTrips error:', error);
+    throw error;
   }
 }
 
@@ -66,7 +67,8 @@ async function getTrips(args, context, info) {
 
     return trips || getAllTrips(limit, cursor, fields);
   } catch (error) {
-    throw new Error(error);
+    logger.error('TripQuery - getMyTrips error:', error);
+    throw error;
   }
 }
 
@@ -78,14 +80,34 @@ async function getPendingTrips(__, context) {
     }
 
     const trips = await Trip.find({ status: 'Pending' }).lean();
+
     return trips;
   } catch (error) {
-    throw new Error(error);
+    logger.error('TripQuery - getPendingTrips error:', error);
+    throw error;
   }
 }
 
+async function getTripById(args, context, info) {
+  try {
+    const { userRole } = context.signature;
+    if (userRole !== 'Admin') {
+      return null;
+    }
+
+    const { id } = args;
+    const fields = getFields(info);
+    const trip = await Trip.findById(id, fields).lean();
+
+    return trip;
+  } catch (error) {
+    logger.error('TripQuery - getTripById error:', error);
+    throw error;
+  }
+}
 module.exports = {
   getMyTrips,
   getTrips,
   getPendingTrips,
+  getTripById,
 };

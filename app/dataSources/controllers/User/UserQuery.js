@@ -6,16 +6,18 @@ const {
   getAllUsers,
 } = require('../../utils');
 
-async function getMe(__, context) {
+async function getMe(__, context, info) {
   try {
     const { userId } = context.signature;
-    const user = await User.findById(userId).lean();
+    const fields = getFields(info);
+    const user = await User.findById(userId, fields).lean();
     if (!user) {
       return null;
     }
     return user;
   } catch (error) {
-    throw new Error(error);
+    logger.error('UserQuery - getMe error:', error);
+    throw error;
   }
 }
 
@@ -45,7 +47,8 @@ async function getUsers(args, context, info) {
 
     return getAllUsers(limit, cursor, fields);
   } catch (error) {
-    throw new Error(error);
+    logger.error('UserQuery - getUsers error:', error);
+    throw error;
   }
 }
 
