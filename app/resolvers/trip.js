@@ -7,9 +7,6 @@ function getId(parent) {
 async function getCustomer(parent, __, context, info) {
   try {
     const { customer } = parent;
-    if (!customer) {
-      return null;
-    }
 
     const fields = getFields(info);
     const key = JSON.stringify({ userId: customer.toString(), fields });
@@ -27,9 +24,7 @@ async function getCustomer(parent, __, context, info) {
 async function getDriver(parent, __, context, info) {
   try {
     const { driver } = parent;
-    if (!driver) {
-      return null;
-    }
+
     const fields = getFields(info);
     const key = JSON.stringify({ userId: driver.toString(), fields });
 
@@ -44,23 +39,14 @@ async function getDriver(parent, __, context, info) {
 }
 
 function createAt(parent) {
-  if (!parent.createAt) {
-    return null;
-  }
   return (new Date(parent.createAt)).toString();
 }
 
 function startTime(parent) {
-  if (!parent.startTime) {
-    return null;
-  }
   return (new Date(parent.startTime)).toString();
 }
 
 function endTime(parent) {
-  if (!parent.endTime) {
-    return null;
-  }
   return (new Date(parent.endTime)).toString();
 }
 

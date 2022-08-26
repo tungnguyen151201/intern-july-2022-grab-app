@@ -3,9 +3,6 @@ const { getFields } = require('../dataSources/utils');
 async function getUser(parent, __, context, info) {
   try {
     const { user } = parent;
-    if (!user) {
-      return null;
-    }
 
     const fields = getFields(info);
     const key = JSON.stringify({ userId: user.toString(), fields });
@@ -20,6 +17,10 @@ async function getUser(parent, __, context, info) {
   }
 }
 
+function createAt(parent) {
+  return (new Date(parent.createAt)).toString();
+}
 module.exports = {
   user: getUser,
+  createAt,
 };

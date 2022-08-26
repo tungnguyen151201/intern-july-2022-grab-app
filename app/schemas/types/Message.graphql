@@ -1,4 +1,5 @@
 type Message {
     user: User
     message: String
+    createAt: String
 }

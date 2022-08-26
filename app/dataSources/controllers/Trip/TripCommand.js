@@ -1,4 +1,4 @@
-const { Trip } = require('../../models');
+const { Trip, Room } = require('../../models');
 
 async function createTrip(args, context) {
   try {
@@ -147,6 +147,10 @@ async function finishTrip(args, context) {
     }
 
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Finished', endTime: Date.now() }, { new: true }).lean();
+
+    const room = await Room.findOne({ trip: args.id }, '_id').lean();
+    trip.room = room._id.toString();
+
     return {
       isSuccess: true,
       message: 'Trip finished',
@@ -185,7 +189,12 @@ async function cancelTrip(args, context) {
         message: 'Invalid trip',
       };
     }
+
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Canceled' }, { new: true }).lean();
+
+    const room = await Room.findOne({ trip: args.id }, '_id').lean();
+    trip.room = room._id.toString();
+
     return {
       isSuccess: true,
       message: 'Trip canceled',

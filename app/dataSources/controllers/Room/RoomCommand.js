@@ -2,28 +2,47 @@ const { Room } = require('../../models');
 
 async function createChatRoom(args, context) {
   try {
-    const { userToChat, name } = args;
-    const { userId } = context.signature;
-
+    const { tripId } = args;
     const existedRoom = await Room.findOne(
       {
-        $or: [
-          { user1: userId, user2: userToChat },
-          { user1: userToChat, user2: userId },
-        ],
+        trip: tripId,
       },
       '_id',
     ).lean();
+
     if (existedRoom) {
       return {
         isSuccess: false,
         message: 'Room existed',
       };
     }
+
+    const fields = 'customer driver status';
+    const key = JSON.stringify({ tripId, fields });
+
+    const { dataloaders } = context;
+    const trip = await dataloaders.tripById.load(key);
+
+    if (trip?.status !== 'Accepted' && trip?.status !== 'Driving') {
+      return {
+        isSuccess: false,
+        message: 'Invalid trip',
+      };
+    }
+
+    const { userId } = context.signature;
+    const { customer, driver } = trip;
+
+    if (userId !== customer.toString() && userId !== driver.toString()) {
+      return {
+        isSuccess: false,
+        message: 'Permission denied',
+      };
+    }
+
     const room = await Room.create({
-      user1: userId,
-      user2: userToChat,
-      name: name || 'Chat room',
+      trip: tripId,
+      users: [customer, driver],
     });
 
     return {

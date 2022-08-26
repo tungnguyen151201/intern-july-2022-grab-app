@@ -5,12 +5,12 @@ const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
 const { checkQuery, createDataLoader, verifyToken } = require('./utils');
-const { createChatServer } = require('./chat/server');
+const chatServer = require('./chat/server');
 
 const app = express();
 const server = http.createServer(app);
 
-createChatServer(server);
+chatServer.attach(server);
 
 app.get('/chat', (__, res) => {
   res.sendFile(`${__dirname}/chat/client/index.html`);

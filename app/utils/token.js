@@ -30,7 +30,7 @@ async function verifyToken(token) {
     return { isSuccess: false, message: 'Token rejected' };
   }
 
-  const signature = { userId, userRole: user.role };
+  const signature = { userId, userRole: user.role, fullname: `${user.lastName} ${user.firstName}` };
   return { isSuccess: true, signature };
 }
 

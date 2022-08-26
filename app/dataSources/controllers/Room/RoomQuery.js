@@ -7,11 +7,42 @@ async function getRoomById(args, context, info) {
 
     const { id } = args;
     let fields = getFields(info);
-    if (!fields.includes('user1')) fields += ' user1';
-    if (!fields.includes('user2')) fields += ' user2';
+    if (!fields.includes('users')) fields += ' users';
 
     const room = await Room.findById(id, fields).lean();
-    if (userId !== room.user1.toString() && userId !== room.user2.toString()) {
+
+    if (!room) {
+      return null;
+    }
+
+    const userIds = room.users.map(user => user.toString());
+    if (!userIds.includes(userId)) {
+      return null;
+    }
+
+    return room;
+  } catch (error) {
+    logger.error('RoomQuery - getRoomById error:', error);
+    throw error;
+  }
+}
+
+async function getRoomByTrip(args, context, info) {
+  try {
+    const { userId } = context.signature;
+
+    const { trip } = args;
+    let fields = getFields(info);
+    if (!fields.includes('users')) fields += ' users';
+
+    const room = await Room.findOne({ trip }, fields).lean();
+
+    if (!room) {
+      return null;
+    }
+
+    const userIds = room.users.map(user => user.toString());
+    if (!userIds.includes(userId)) {
       return null;
     }
 
@@ -30,10 +61,7 @@ async function getMyRooms(args, context, info) {
     const fields = getFields(info);
 
     const filters = {
-      $or: [
-        { user1: userId },
-        { user2: userId },
-      ],
+      users: userId,
     };
     if (cursor) {
       filters._id = { $lt: cursor };
@@ -53,5 +81,6 @@ async function getMyRooms(args, context, info) {
 
 module.exports = {
   getRoomById,
+  getRoomByTrip,
   getMyRooms,
 };

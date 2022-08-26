@@ -16,5 +16,5 @@ type Mutation {
   finishTrip(id: ID!): MutationResponse!
   cancelTrip(id: ID!): MutationResponse!
 
-  createChatRoom(userToChat: ID!, name: String): CreateChatRoomResponse!
+  createChatRoom(tripId: ID!): CreateChatRoomResponse!
 }

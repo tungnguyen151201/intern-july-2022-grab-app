@@ -18,7 +18,21 @@ async function setBlockedToken(token, expireAt) {
   await redisClient.expireAt(hashedToken, expireAt);
 }
 
+async function getSocketIdToken(token) {
+  const hashedToken = `sk_${hashToken(token)}`;
+  const result = await redisClient.get(hashedToken);
+  return result;
+}
+
+async function setSocketIdToken(token, socketId, expireAt) {
+  const hashedToken = `sk_${hashToken(token)}`;
+  await redisClient.set(hashedToken, socketId);
+  await redisClient.expireAt(hashedToken, expireAt);
+}
+
 module.exports = {
   getBlockedToken,
   setBlockedToken,
+  getSocketIdToken,
+  setSocketIdToken,
 };

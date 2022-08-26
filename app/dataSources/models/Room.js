@@ -3,10 +3,15 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const roomSchema = new Schema({
-  name: String,
-  user1: { type: mongoose.ObjectId, required: true },
-  user2: { type: mongoose.ObjectId, required: true },
-  messages: [String],
+  trip: { type: mongoose.ObjectId, required: true, uniqe: true },
+  users: [{ type: mongoose.ObjectId, required: true }],
+  messages: [
+    {
+      user: mongoose.ObjectId,
+      message: String,
+      createAt: Date,
+    },
+  ],
 });
 
 const room = mongoose.model('room', roomSchema);

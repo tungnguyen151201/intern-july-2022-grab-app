@@ -43,7 +43,7 @@ async function signUp(args) {
 async function login(args) {
   try {
     const { username, password } = args;
-    const user = await User.findOne({ username }, 'username password status').lean();
+    const user = await User.findOne({ username }).lean();
     if (!user) {
       return {
         isSuccess: false,

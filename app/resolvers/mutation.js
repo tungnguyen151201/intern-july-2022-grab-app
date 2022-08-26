@@ -1,3 +1,6 @@
+const io = require('../chat/server');
+const { getSocketIdToken } = require('../dataSources/utils/redis');
+
 // User
 async function signUp(__, args, context, info) {
   const { dataSources } = context;
@@ -20,6 +23,13 @@ async function activateDriver(__, args, context, info) {
 async function logout(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.logout(args, context, info);
+
+  if (result.isSuccess) {
+    const { token } = context;
+    const socketId = await getSocketIdToken(token);
+    io.in(socketId).disconnectSockets(true);
+  }
+
   return result;
 }
 
@@ -45,12 +55,22 @@ async function startTrip(__, args, context, info) {
 async function finishTrip(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.finishTrip(args, context, info);
+
+  if (result.isSuccess) {
+    io.in(result.trip.room).disconnectSockets(true);
+  }
+
   return result;
 }
 
 async function cancelTrip(__, args, context, info) {
   const { dataSources } = context;
   const result = await dataSources.cancelTrip(args, context, info);
+
+  if (result.isSuccess) {
+    io.in(result.trip.room).disconnectSockets(true);
+  }
+
   return result;
 }
 

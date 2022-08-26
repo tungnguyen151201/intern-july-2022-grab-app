@@ -1,7 +1,6 @@
 type Room {
     id: ID!
-    name: String
-    user1: User!
-    user2: User!
+    trip: Trip
+    users: [User!]!
     messages: [Message]
 }

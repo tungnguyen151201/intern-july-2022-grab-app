@@ -99,7 +99,7 @@
       var RoomId = document.getElementById('RoomId');
       
       if (socket?.connected) {
-        socket.disconnect();
+        socket.disconnect(true);
       }
 
       socket = io.connect('http://localhost:4000', {
@@ -109,21 +109,21 @@
       });
 
       socket.emit('join-room', RoomId.value);
-      socket.on('join-room', ({ user, msg }) => {
-        messages.innerHTML += `<li>${user}: ${msg}</li>`;
+      socket.on('join-room', ({ user, message }) => {
+        messages.innerHTML += `<li>${user}: ${message}</li>`;
       });
 
-      socket.on('chat-message', ({ msg, user }) => {
-        messages.innerHTML += `<li>${user}: ${msg}</li>`;
+      socket.on('chat-message', ({ user, message }) => {
+        messages.innerHTML += `<li>${user}: ${message}</li>`;
       });
   
       socket.on('connect_error', (error) => {
+        if (error.message === 'xhr poll error') return;
         messages.innerHTML += `<li>${error}</li>`;
       });
 
       socket.on('handle-error', (error) => {
         messages.innerHTML += `<li>${error}</li>`;
-        socket.disconnect();
       });
     });
 
@@ -133,8 +133,7 @@
         return;
       }
       if (input.value) {
-        var data = { msg: input.value };
-        socket.emit('chat-message', data);
+        socket.emit('chat-message', input.value);
         input.value = '';
       }
     });
