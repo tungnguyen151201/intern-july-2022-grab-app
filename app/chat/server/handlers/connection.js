@@ -1,8 +1,5 @@
 const jwt = require('jsonwebtoken');
-const {
-  setSocketIdToken,
-  getBlockedToken,
-} = require('../../../dataSources/utils/redis');
+const { setSocketIdToken } = require('../../../dataSources/utils/redis');
 const config = require('../../../config');
 const { verifyToken } = require('../../../utils');
 
@@ -14,7 +11,7 @@ module.exports = async socket => {
     const { exp } = jwt.verify(token, config.jwt.secretKey);
     await setSocketIdToken(token, id, exp);
   } catch (error) {
-    logger.error('connectionHandlers error:', error);
+    logger.error('connectionHandler - save socketId error:', error);
     socket.disconnect(true);
   }
 
@@ -28,9 +25,10 @@ module.exports = async socket => {
         socket.disconnect(true);
       }
     } catch (error) {
+      logger.error('connectionHandler - timer verifyToken error:', error);
       socket.disconnect(true);
     }
-  }, 10 * 1000);
+  }, 30 * 1000);
 
   function onDisconnect() {
     clearInterval(timer);
