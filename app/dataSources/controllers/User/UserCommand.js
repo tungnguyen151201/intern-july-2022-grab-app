@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../../../config');
 const { User } = require('../../models');
 const { redisClient, setBlockedToken } = require('../../utils/redis');
+const { disconnectByToken, disconnectByUserId } = require('../../../chat/server');
 
 async function signUp(args) {
   try {
@@ -144,6 +145,8 @@ async function activateDriver(args, context) {
     // Clear cache
     redisClient.del(driver._id.toString());
 
+    disconnectByUserId(driver._id.toString());
+
     return {
       isSuccess: true,
       message: deactivate
@@ -166,6 +169,8 @@ async function logout(__, context) {
 
     const { exp } = jwt.verify(token, config.jwt.secretKey);
     await setBlockedToken(token, exp);
+
+    disconnectByToken(token);
 
     return { isSuccess: true, message: 'Logged out' };
   } catch (error) {

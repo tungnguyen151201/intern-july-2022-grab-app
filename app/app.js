@@ -4,8 +4,10 @@ const http = require('http');
 const typeDefs = require('./schemas');
 const dataSources = require('./dataSources');
 const resolvers = require('./resolvers');
-const { checkQuery, createDataLoader, verifyToken } = require('./utils');
-const chatServer = require('./chat/server');
+const { checkQuery, createDataLoader } = require('./utils');
+
+const { verifyToken } = dataSources.redisUtils;
+const { chatServer } = require('./chat/server');
 
 const app = express();
 const server = http.createServer(app);

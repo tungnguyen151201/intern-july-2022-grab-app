@@ -37,7 +37,10 @@ module.exports = async (io, socket) => {
 
       socket.join(roomId);
 
-      io.to(roomId).emit('join-room', { user: fullname, message: 'joined room' });
+      io.to(roomId).emit('join-room', {
+        user: fullname,
+        message: 'joined room',
+      });
       room = roomId;
     } catch (error) {
       logger.error('chatHandler - joinRoom error', error);
@@ -56,9 +59,12 @@ module.exports = async (io, socket) => {
 
       io.to(room).emit('chat-message', { user: fullname, message });
 
-      await Room.updateOne({ _id: room }, {
-        $push: { messages: { user: userId, message, createAt: Date.now() } },
-      });
+      await Room.updateOne(
+        { _id: room },
+        {
+          $push: { messages: { user: userId, message, createAt: Date.now() } },
+        },
+      );
     } catch (error) {
       logger.error('chatHandler - chatMessage error', error);
       socket.emit('handle-error', error.message);

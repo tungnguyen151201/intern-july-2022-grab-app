@@ -1,4 +1,5 @@
 const { Trip, Room } = require('../../models');
+const { leaveRoom } = require('../../../chat/server');
 
 async function createTrip(args, context) {
   try {
@@ -149,7 +150,7 @@ async function finishTrip(args, context) {
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Finished', endTime: Date.now() }, { new: true }).lean();
 
     const room = await Room.findOne({ trip: args.id }, '_id').lean();
-    trip.room = room._id.toString();
+    leaveRoom(room._id.toString());
 
     return {
       isSuccess: true,
@@ -193,7 +194,7 @@ async function cancelTrip(args, context) {
     trip = await Trip.findByIdAndUpdate(args.id, { status: 'Canceled' }, { new: true }).lean();
 
     const room = await Room.findOne({ trip: args.id }, '_id').lean();
-    trip.room = room._id.toString();
+    leaveRoom(room._id.toString());
 
     return {
       isSuccess: true,

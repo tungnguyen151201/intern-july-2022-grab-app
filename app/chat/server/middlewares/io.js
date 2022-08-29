@@ -1,4 +1,6 @@
-const { verifyToken } = require('../../../utils');
+const { redis } = require('../../../dataSources/utils');
+
+const { verifyToken } = redis;
 
 module.exports = async (socket, next) => {
   try {

@@ -1,15 +1,7 @@
-const { Server } = require('socket.io');
-const { registerChatHandlers, registerErrorHandlers, registerConnectionHandlers } = require('./handlers');
-const { ioMiddlewares } = require('./middlewares');
+const server = require('./createServer');
+const utils = require('./utils');
 
-const io = new Server();
-const onConnection = socket => {
-  registerConnectionHandlers(socket);
-  registerChatHandlers(io, socket);
-  registerErrorHandlers(socket);
+module.exports = {
+  chatServer: server,
+  ...utils,
 };
-
-io.use(ioMiddlewares);
-io.on('connection', onConnection);
-
-module.exports = io;
