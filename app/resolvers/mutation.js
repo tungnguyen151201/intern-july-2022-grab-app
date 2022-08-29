@@ -26,8 +26,13 @@ async function logout(__, args, context, info) {
 
   if (result.isSuccess) {
     const { token } = context;
-    const socketId = await getSocketIdToken(token);
-    io.in(socketId).disconnectSockets(true);
+    // const socketId = await getSocketIdToken(token);
+    const { sockets } = io.sockets;
+    sockets.forEach((value, key) => {
+      if (value.handshake.auth.token === token) {
+        io.in(key).disconnectSockets(true);
+      }
+    });
   }
 
   return result;
