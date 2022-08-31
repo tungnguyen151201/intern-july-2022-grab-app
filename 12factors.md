@@ -81,5 +81,6 @@
 ### Thực thi nhiệm vụ quản trị như là một tiến trình
 - Các nhiệm vụ quản trị app như là:
   - Thay đổi database.
-  - Giao diện điều khiển trực tiếp app, chạy các đoạn code tùy ý.
-- Tiến trình quản trị thực thi một lần (one-off admin process) nên được vận hành trong một môi trường giống với môi trường vận hành lâu dài của app. Với 1 bản release, admin process sử dụng cùng 1 codebase và config với process vận hành bản release đó.
+  - Giao diện điều khiển trực tiếp app, chạy các đoạn code tùy ý hoặc kiểm tra các mô hình của app đối với database hiện tại.
+  - Chạy các one-time scripts.
+- Tiến trình quản trị thực thi một lần (one-off admin process) nên được vận hành trong một môi trường giống với môi trường vận hành lâu dài (long-running) của app. Với 1 bản release, admin process sử dụng cùng 1 codebase và config với process vận hành bản release đó.
